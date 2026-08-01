@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ShopSense OS — Admin Control Dashboard</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ==========================================================================
+       DARK GLASSMORPHISM SAAS DESIGN SYSTEM
+       ========================================================================== */
+    :root {
+      --bg-base: #070a12;
+      --bg-surface: rgba(17, 24, 39, 0.8);
+      --bg-card: rgba(26, 35, 54, 0.75);
+      --bg-card-hover: rgba(34, 45, 68, 0.9);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-color-glow: rgba(99, 102, 241, 0.4);
+
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-subtle: #64748b;
+
+      --accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #3b82f6 100%);
+      --accent-gold-gradient: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+      --accent-purple: #8b5cf6;
+      --accent-indigo: #6366f1;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+
+      --shadow-card: 0 12px 36px -6px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--border-color);
+      --shadow-glow: 0 0 25px rgba(99, 102, 241, 0.3);
+      --shadow-gold-glow: 0 0 25px rgba(245, 158, 11, 0.25);
+
+      --transition-fast: 150ms cubic-bezier(0.16, 1, 0.3, 1);
+      --transition-normal: 250ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-base);
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 85% 85%, rgba(139, 92, 246, 0.12) 0%, transparent 45%);
+      color: var(--text-main);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-base); }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+
+    /* LAYOUT: SIDEBAR */
+    .app-sidebar {
+      width: 260px; background: rgba(17, 24, 39, 0.85);
+      backdrop-filter: blur(20px); border-right: 1px solid var(--border-color);
+      display: flex; flex-direction: column; padding: 24px 16px; gap: 32px;
+      z-index: 10; flex-shrink: 0;
+    }
+
+    .brand-container { display: flex; align-items: center; gap: 12px; padding: 0 8px; }
+
+    .brand-logo-icon {
+      width: 42px; height: 42px; border-radius: var(--radius-md);
+      background: var(--accent-gradient); display: flex; align-items: center; justify-content: center;
+      box-shadow: var(--shadow-glow);
+    }
+
+    .brand-logo-icon svg { width: 22px; height: 22px; fill: #ffffff; }
+
+    .brand-text {
+      font-size: 20px; font-weight: 800; letter-spacing: -0.5px;
+      background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .brand-badge {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      padding: 2px 6px; border-radius: 4px; background: rgba(99, 102, 241, 0.2);
+      color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+
+    .nav-menu { display: flex; flex-direction: column; gap: 6px; list-style: none; }
+
+    .nav-item-btn {
+      width: 100%; display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px; border-radius: var(--radius-md);
+      background: transparent; border: 1px solid transparent;
+      color: var(--text-muted); font-size: 14px; font-weight: 500;
+      cursor: pointer; transition: all var(--transition-normal); text-align: left; position: relative;
+    }
+
+    .nav-item-btn svg { width: 20px; height: 20px; stroke: var(--text-muted); fill: none; stroke-width: 2; }
+    .nav-item-btn:hover { background: rgba(255, 255, 255, 0.05); color: #fff; transform: translateX(4px); }
+
+    /* GLOWING LEFT BORDER FOR ACTIVE SIDEBAR NAV */
+    .nav-item-btn.active {
+      background: rgba(99, 102, 241, 0.15); border: 1px solid var(--border-color-glow);
+      color: #ffffff; font-weight: 600; box-shadow: 0 4px 16px rgba(99, 102, 241, 0.2);
+    }
+    .nav-item-btn.active::before {
+      content: ''; position: absolute; left: 0; top: 20%; height: 60%; width: 3px;
+      background: var(--accent-indigo); border-radius: 0 3px 3px 0; box-shadow: 0 0 8px var(--accent-indigo);
+    }
+    .nav-item-btn.active svg { stroke: #818cf8; }
+
+    .sidebar-footer {
+      margin-top: auto; padding: 16px; background: rgba(255, 255, 255, 0.02);
+      border-radius: var(--radius-md); border: 1px solid var(--border-color);
+      display: flex; flex-direction: column; gap: 12px;
+    }
+
+    .btn-logout {
+      background: rgba(244, 63, 94, 0.15); color: #f87171; border: 1px solid rgba(244, 63, 94, 0.3);
+      font-size: 13px; font-weight: 600; padding: 8px 12px; border-radius: var(--radius-sm);
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+      transition: all var(--transition-fast);
+    }
+    .btn-logout:hover { background: rgba(244, 63, 94, 0.25); }
+
+    /* MAIN CONTAINER */
+    .app-main {
+      flex: 1; display: flex; flex-direction: column;
+      height: 100vh; overflow-y: auto; background: transparent;
+    }
+
+    .header-bar {
+      height: 84px; padding: 0 36px; border-bottom: 1px solid var(--border-color);
+      background: rgba(17, 24, 39, 0.6); backdrop-filter: blur(20px);
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 5;
+    }
+
+    .header-title { font-size: 34px; font-weight: 900; color: #ffffff; letter-spacing: -0.8px; }
+
+    .btn-gradient {
+      background: var(--accent-gradient); color: #ffffff; font-weight: 700; font-size: 14px;
+      padding: 11px 22px; border-radius: var(--radius-md); border: none; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 8px; box-shadow: var(--shadow-glow);
+      transition: all var(--transition-normal);
+    }
+    .btn-gradient:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 0 30px rgba(99, 102, 241, 0.45); }
+
+    /* CONTENT AREA */
+    .content-area { padding: 36px; display: flex; flex-direction: column; gap: 32px; max-width: 1400px; width: 100%; margin: 0 auto; }
+    .view-section { display: none; animation: fadeInSlideUp 300ms ease forwards; }
+    .view-section.active { display: flex; flex-direction: column; gap: 32px; }
+
+    @keyframes fadeInSlideUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* STAT CARDS & GLASSMORPHISM */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+
+    .stat-card {
+      background: var(--bg-card); backdrop-filter: blur(16px);
+      border-radius: var(--radius-lg); border: 1px solid var(--border-color);
+      padding: 24px; display: flex; flex-direction: column; gap: 16px;
+      position: relative; overflow: hidden; box-shadow: var(--shadow-card);
+      transition: all var(--transition-normal);
+    }
+    .stat-card:hover { transform: translateY(-4px) scale(1.02); border-color: var(--border-color-glow); box-shadow: var(--shadow-glow); }
+
+    .stat-card.highlighted-coral { background: rgba(249, 115, 22, 0.1); border-color: rgba(249, 115, 22, 0.4); }
+    .stat-card.highlighted-gold { background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.4); box-shadow: var(--shadow-gold-glow); }
+
+    .stat-card-header { display: flex; align-items: center; justify-content: space-between; }
+    .stat-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+    .stat-icon {
+      width: 42px; height: 42px; border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.25);
+    }
+    .stat-icon svg { width: 22px; height: 22px; stroke: #818cf8; fill: none; stroke-width: 2; }
+
+    .stat-value { font-size: 36px; font-weight: 900; color: #ffffff; letter-spacing: -1px; }
+
+    /* PANELS */
+    .card-panel {
+      background: var(--bg-card); backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color); border-radius: var(--radius-lg);
+      padding: 26px; box-shadow: var(--shadow-card); display: flex; flex-direction: column; gap: 20px;
+    }
+
+    .panel-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 16px; }
+    .panel-title { font-size: 17px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
+
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+
+    .form-input, .select-filter {
+      background: rgba(17, 24, 39, 0.8); border: 1px solid var(--border-color);
+      border-radius: var(--radius-md); padding: 12px 16px; color: var(--text-main);
+      font-size: 14px; font-family: inherit; outline: none; transition: all var(--transition-fast);
+    }
+    .form-input:focus, .select-filter:focus { border-color: var(--accent-indigo); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); }
+
+    /* SEARCH BAR */
+    .filter-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .search-box {
+      display: flex; align-items: center; gap: 10px; background: rgba(17, 24, 39, 0.8);
+      border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 10px 14px; width: 320px;
+    }
+    .search-box input { border: none; background: transparent; outline: none; color: var(--text-main); font-size: 14px; width: 100%; }
+
+    /* BREAKDOWN PROGRESS BAR */
+    .breakdown-container { display: flex; flex-direction: column; gap: 8px; background: rgba(17, 24, 39, 0.6); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); }
+    .breakdown-bar { height: 10px; border-radius: 5px; background: #1e293b; overflow: hidden; display: flex; }
+    .bar-segment-active { background: var(--accent-emerald); transition: width 300ms ease; }
+    .bar-segment-pending { background: var(--accent-amber); transition: width 300ms ease; }
+    .bar-segment-suspended { background: var(--accent-rose); transition: width 300ms ease; }
+    .breakdown-legend { display: flex; gap: 20px; font-size: 12px; font-weight: 600; color: var(--text-muted); }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+
+    /* LIVE ACTIVITY FEED LOG LIST */
+    .activity-feed-list { display: flex; flex-direction: column; gap: 10px; max-height: 320px; overflow-y: auto; }
+    .activity-feed-item {
+      display: flex; align-items: flex-start; gap: 12px; background: rgba(17, 24, 39, 0.6);
+      padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color);
+      transition: all var(--transition-fast);
+    }
+    .activity-feed-item:hover { background: rgba(34, 45, 68, 0.6); border-color: var(--border-color-glow); }
+
+    /* STATUS BADGES (REQUIREMENT 1: REJECTED BADGE) */
+    .status-badge { font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 4px 10px; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px; }
+    .status-badge.active { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .status-badge.pending { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .status-badge.suspended { background: rgba(244, 63, 94, 0.15); color: #f87171; border: 1px solid rgba(244, 63, 94, 0.3); }
+
+    /* TABLE */
+    .table-responsive { width: 100%; overflow-x: auto; }
+    .data-table { width: 100%; border-collapse: collapse; text-align: left; }
+    .data-table th { padding: 14px 16px; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-subtle); border-bottom: 1px solid var(--border-color); }
+    .data-table td { padding: 16px; font-size: 14px; color: var(--text-muted); border-bottom: 1px solid rgba(255, 255, 255, 0.04); }
+    .data-table tr:hover td { background: rgba(255, 255, 255, 0.02); color: var(--text-main); }
+
+    .btn-action-approve { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: var(--radius-sm); cursor: pointer; }
+    .btn-action-reject { background: rgba(244, 63, 94, 0.15); color: #f87171; border: 1px solid rgba(244, 63, 94, 0.3); font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: var(--radius-sm); cursor: pointer; }
+
+    /* TOAST */
+    .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 200; display: flex; flex-direction: column; gap: 10px; }
+    .toast { background: var(--bg-card); border: 1px solid var(--border-color); padding: 14px 20px; border-radius: var(--radius-md); box-shadow: 0 10px 30px rgba(0,0,0,0.5); color: var(--text-main); font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; animation: slideIn 300ms ease forwards; }
+    .toast.success { border-color: rgba(16, 185, 129, 0.4); }
+    .toast.error { border-color: rgba(244, 63, 94, 0.4); }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="app-sidebar">
+    <div class="brand-container">
+      <div class="brand-logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+      </div>
+      <div>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span class="brand-text">ShopSense</span>
+          <span class="brand-badge">Admin</span>
+        </div>
+        <div style="font-size: 11px; color: var(--text-subtle);">Platform Administration</div>
+      </div>
+    </div>
+
+    <ul class="nav-menu">
+      <li>
+        <button class="nav-item-btn active" onclick="switchTab('dashboard', this)">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+          Dashboard
+        </button>
+      </li>
+      <li>
+        <button class="nav-item-btn" onclick="switchTab('vendors', this)">
+          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Vendors Control
+        </button>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <div style="display:flex; flex-direction:column; gap:2px;">
+        <span style="font-size:13px; font-weight:700; color:#fff;" id="admin-name">System Admin</span>
+        <span style="font-size:11px; color:var(--text-muted);" id="admin-email">admin@shopsense.com</span>
+      </div>
+      <button class="btn-logout" onclick="handleLogout()">
+        <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTAINER -->
+  <main class="app-main">
+    <header class="header-bar">
+      <h1 class="header-title" id="current-view-title">Admin Control Dashboard</h1>
+
+      <div class="header-actions">
+        <button class="btn-gradient" onclick="handleRefreshDashboard()">
+          🔄 Refresh Data
+        </button>
+      </div>
+    </header>
+
+    <div class="content-area">
+
+      <!-- VIEW 1: DASHBOARD OVERVIEW -->
+      <section id="view-dashboard" class="view-section active">
+        <!-- 4 Stat Cards Grid -->
+        <div class="stats-grid">
+          
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Total Platform Revenue</span>
+              <div class="stat-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+            </div>
+            <span class="stat-value" id="stat-revenue">₹0</span>
+            <span style="font-size:12px; color:var(--text-subtle);">Gross GMV in Indian Rupees (₹)</span>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Active Vendors</span>
+              <div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+            </div>
+            <span class="stat-value" id="stat-active-vendors">0</span>
+            <span style="font-size:12px; color:var(--text-subtle);">Approved merchant partners</span>
+          </div>
+
+          <div class="stat-card highlighted-coral">
+            <div class="stat-card-header">
+              <span class="stat-label">Pending Approvals</span>
+              <div class="stat-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+            </div>
+            <span class="stat-value" id="stat-pending-vendors" style="color:var(--accent-amber)">0</span>
+            <span style="font-size:12px; color:var(--accent-amber); font-weight:600;">Requires admin review</span>
+          </div>
+
+          <div class="stat-card highlighted-gold">
+            <div class="stat-card-header">
+              <span class="stat-label" style="color:var(--accent-amber);">🏆 Vendor of the Month</span>
+              <div class="stat-icon" style="background:rgba(245,158,11,0.15); border-color:rgba(245,158,11,0.3);"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="var(--accent-amber)"/></svg></div>
+            </div>
+            <span class="stat-value" id="top-vendor-name" style="font-size:24px; color:var(--accent-amber);">Samsung</span>
+            <span style="font-size:12px; color:var(--text-main); font-weight:600;" id="top-vendor-revenue">Revenue: ₹0 • 0 orders</span>
+          </div>
+
+        </div>
+
+        <div style="display:grid; grid-template-columns: 2fr 1fr; gap:20px;">
+          
+          <!-- REQUIREMENT 1: REJECTED TERMINOLOGY IN LEGEND -->
+          <div class="card-panel">
+            <div class="panel-header">
+              <h2 class="panel-title">Vendor Status Matrix Breakdown</h2>
+            </div>
+            <div class="breakdown-container">
+              <div class="breakdown-bar">
+                <div class="bar-segment-active" id="bar-active" style="width:60%;"></div>
+                <div class="bar-segment-pending" id="bar-pending" style="width:25%;"></div>
+                <div class="bar-segment-suspended" id="bar-suspended" style="width:15%;"></div>
+              </div>
+              <div class="breakdown-legend">
+                <div><span class="legend-dot" style="background:var(--accent-emerald);"></span> Active: <span id="legend-active-count">0</span></div>
+                <div><span class="legend-dot" style="background:var(--accent-amber);"></span> Pending: <span id="legend-pending-count">0</span></div>
+                <div><span class="legend-dot" style="background:var(--accent-rose);"></span> Rejected: <span id="legend-suspended-count">0</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- REQUIREMENT 6 FIX: LIVE ACTIVITY FEED WITH CORRECT TIMESTAMPS -->
+          <div class="card-panel">
+            <div class="panel-header">
+              <h2 class="panel-title">
+                <svg style="width:18px;height:18px;stroke:var(--accent-indigo);fill:none;stroke-width:2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                Live Activity Feed
+              </h2>
+            </div>
+            <div class="activity-feed-list" id="activity-feed-list">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+        </div>
+
+        <!-- REQUIREMENT 5: NEW FEATURE - PER-VENDOR REVENUE SECTION -->
+        <div class="card-panel">
+          <div class="panel-header">
+            <h2 class="panel-title">
+              <svg style="width:20px;height:20px;stroke:var(--accent-emerald);fill:none;stroke-width:2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              Per-Vendor Revenue & Financial Breakdown
+            </h2>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Vendor Identity</th>
+                  <th>Contact Email</th>
+                  <th>Status</th>
+                  <th>Total Orders</th>
+                  <th>Units Sold</th>
+                  <th>Total Revenue (₹ INR)</th>
+                </tr>
+              </thead>
+              <tbody id="per-vendor-revenue-body">
+                <!-- Dynamically populated via GET /vendors/revenue-summary -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- VIEW 2: VENDORS CONTROL & REGISTRATION -->
+      <section id="view-vendors" class="view-section">
+        
+        <div class="card-panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Register New Vendor</h2>
+          </div>
+          <form id="vendor-reg-form" onsubmit="handleAdminRegisterVendor(event)">
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="reg-name">Vendor / Company Name</label>
+                <input class="form-input" type="text" id="reg-name" placeholder="e.g. Realme Global" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="reg-email">Email Address</label>
+                <input class="form-input" type="email" id="reg-email" placeholder="contact@realme.com" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="reg-password">Password</label>
+                <input class="form-input" type="password" id="reg-password" placeholder="Minimum 6 characters" required minlength="6" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="reg-phone">Phone Number (Optional)</label>
+                <input class="form-input" type="tel" id="reg-phone" placeholder="+91-98765-43210" />
+              </div>
+            </div>
+            <div style="margin-top: 16px; display: flex; justify-content: flex-end;">
+              <button class="btn-gradient" type="submit" id="btn-reg-submit">
+                Register Vendor
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card-panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Marketplace Vendor Directory</h2>
+          </div>
+
+          <!-- REQUIREMENT 1: REJECTED TERMINOLOGY IN FILTER DROPDOWN -->
+          <div class="filter-bar">
+            <div class="search-box">
+              <svg style="width:16px;height:16px;stroke:var(--text-muted);fill:none;stroke-width:2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="search-input" placeholder="Search vendor name or email..." oninput="filterVendorsTable()" />
+            </div>
+
+            <select class="select-filter" id="status-filter" onchange="filterVendorsTable()">
+              <option value="ALL">All Statuses</option>
+              <option value="active">Active Only</option>
+              <option value="pending">Pending Only</option>
+              <option value="suspended">Rejected Only</option>
+            </select>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>UUID / ID</th>
+                  <th>Vendor Identity</th>
+                  <th>Communications</th>
+                  <th>Status Matrix</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="vendor-table-body">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    const API_BASE = window.location.origin.includes('http') ? window.location.origin : 'http://127.0.0.1:8000';
+    let rawVendorsList = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const token = sessionStorage.getItem('access_token');
+      const role = sessionStorage.getItem('role');
+
+      if (!token || role !== 'admin') {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      document.getElementById('admin-name').textContent = sessionStorage.getItem('name') || 'System Admin';
+      document.getElementById('admin-email').textContent = sessionStorage.getItem('email') || 'admin@shopsense.com';
+
+      handleRefreshDashboard();
+    });
+
+    function handleLogout() {
+      sessionStorage.clear();
+      window.location.href = 'login.html';
+    }
+
+    async function handleRefreshDashboard() {
+      await Promise.all([
+        fetchDashboardStats(),
+        fetchVendorsDirectory(),
+        fetchLiveActivityFeed(),
+        fetchPerVendorRevenueSummary()
+      ]);
+      showToast('Dashboard & vendor financial breakdown refreshed!', 'success');
+    }
+
+    function switchTab(viewName, btnElement) {
+      document.querySelectorAll('.nav-item-btn').forEach(b => b.classList.remove('active'));
+      if (btnElement) btnElement.classList.add('active');
+
+      document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+      const target = document.getElementById(`view-${viewName}`);
+      if (target) target.classList.add('active');
+
+      const titleMap = {
+        'dashboard': 'Admin Control Dashboard',
+        'vendors': 'Marketplace Vendors Directory & Controls'
+      };
+      document.getElementById('current-view-title').textContent = titleMap[viewName] || 'Admin Dashboard';
+    }
+
+    async function fetchDashboardStats() {
+      try {
+        const response = await fetch(`${API_BASE}/stats`);
+        if (!response.ok) throw new Error('Stats fetch error');
+        const stats = await response.json();
+
+        const formattedRevenue = `₹${stats.total_revenue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        document.getElementById('stat-revenue').textContent = formattedRevenue;
+
+        if (stats.top_vendor) {
+          const topRev = stats.top_vendor.revenue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          document.getElementById('top-vendor-name').textContent = stats.top_vendor.name;
+          document.getElementById('top-vendor-revenue').textContent = `Revenue: ₹${topRev} • ${stats.top_vendor.orders} orders`;
+        }
+      } catch (err) {
+        showToast('Error loading platform stats', 'error');
+      }
+    }
+
+    async function fetchVendorsDirectory() {
+      try {
+        const response = await fetch(`${API_BASE}/vendors/`);
+        if (!response.ok) throw new Error('Vendors fetch error');
+        rawVendorsList = await response.json();
+
+        updateStatusMetricsAndBreakdown();
+        filterVendorsTable();
+      } catch (err) {
+        showToast('Failed to load vendors directory', 'error');
+      }
+    }
+
+    // REQUIREMENT 5: FETCH PER-VENDOR REVENUE BREAKDOWN
+    async function fetchPerVendorRevenueSummary() {
+      const tbody = document.getElementById('per-vendor-revenue-body');
+      try {
+        const response = await fetch(`${API_BASE}/vendors/revenue-summary`);
+        if (!response.ok) throw new Error('Revenue summary fetch error');
+        const summaryList = await response.json();
+
+        if (summaryList.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px; color:var(--text-subtle);">No vendor financial data available.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = summaryList.map(v => `
+          <tr>
+            <td>
+              <div style="font-weight:700; color:#fff;">${escapeHtml(v.vendor_name)}</div>
+              <div style="font-size:11px; color:var(--text-subtle);">Vendor ID: #${v.vendor_id}</div>
+            </td>
+            <td>${escapeHtml(v.email)}</td>
+            <td>
+              <span class="status-badge ${v.status}">${v.status === 'suspended' ? 'REJECTED' : v.status.toUpperCase()}</span>
+            </td>
+            <td><span style="font-weight:600; color:#fff;">${v.total_orders} orders</span></td>
+            <td><span style="font-weight:600; color:#fff;">${v.total_units_sold} units</span></td>
+            <td>
+              <span style="font-weight:800; color:#34d399;">₹${v.total_revenue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--accent-rose); padding:20px;">Failed to load financial breakdown.</td></tr>`;
+      }
+    }
+
+    // REQUIREMENT 6 FIX: ACCURATE LOCAL TIME FORMATTING FOR ACTIVITY FEED
+    async function fetchLiveActivityFeed() {
+      const feedList = document.getElementById('activity-feed-list');
+      try {
+        const response = await fetch(`${API_BASE}/activity-feed`);
+        if (!response.ok) throw new Error('Activity feed fetch error');
+        const logs = await response.json();
+
+        if (logs.length === 0) {
+          feedList.innerHTML = `<div style="font-size:12px; color:var(--text-subtle); padding:12px;">No activity logs recorded yet.</div>`;
+          return;
+        }
+
+        feedList.innerHTML = logs.map(log => {
+          // REQUIREMENT 2: Format ISO timestamp as HH:MM:SS AM/PM in IST (Asia/Kolkata)
+          const dateObj = new Date(log.timestamp);
+          const formattedTime = dateObj.toLocaleTimeString('en-IN', {
+            timeZone: 'Asia/Kolkata',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+          });
+          
+          return `
+            <div class="activity-feed-item">
+              <div style="font-size:11px; font-weight:700; color:var(--accent-indigo); min-width:92px;">${formattedTime}</div>
+              <div style="font-size:12px; color:var(--text-main); line-height:1.4;">${escapeHtml(log.description)}</div>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        feedList.innerHTML = `<div style="font-size:12px; color:var(--accent-rose); padding:12px;">Failed to load activity logs.</div>`;
+      }
+    }
+
+    function updateStatusMetricsAndBreakdown() {
+      const activeCount = rawVendorsList.filter(v => v.role === 'vendor' && v.status === 'active').length;
+      const pendingCount = rawVendorsList.filter(v => v.role === 'vendor' && v.status === 'pending').length;
+      const suspendedCount = rawVendorsList.filter(v => v.role === 'vendor' && v.status === 'suspended').length;
+      const totalVendors = activeCount + pendingCount + suspendedCount || 1;
+
+      document.getElementById('stat-active-vendors').textContent = activeCount;
+      document.getElementById('stat-pending-vendors').textContent = pendingCount;
+
+      document.getElementById('legend-active-count').textContent = activeCount;
+      document.getElementById('legend-pending-count').textContent = pendingCount;
+      document.getElementById('legend-suspended-count').textContent = suspendedCount;
+
+      document.getElementById('bar-active').style.width = `${(activeCount / totalVendors) * 100}%`;
+      document.getElementById('bar-pending').style.width = `${(pendingCount / totalVendors) * 100}%`;
+      document.getElementById('bar-suspended').style.width = `${(suspendedCount / totalVendors) * 100}%`;
+    }
+
+    // REQUIREMENT 1: REJECTED TERMINOLOGY IN TABLE BADGES AND BUTTONS
+    function filterVendorsTable() {
+      const query = document.getElementById('search-input').value.toLowerCase();
+      const statusFilter = document.getElementById('status-filter').value;
+      const tbody = document.getElementById('vendor-table-body');
+
+      const filtered = rawVendorsList.filter(v => {
+        const matchesQuery = v.name.toLowerCase().includes(query) || v.email.toLowerCase().includes(query);
+        const matchesStatus = statusFilter === 'ALL' || v.status === statusFilter;
+        return matchesQuery && matchesStatus;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:32px; color:var(--text-muted);">No matching vendors found.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(v => `
+        <tr>
+          <td><span style="font-family:monospace; font-weight:600; color:var(--text-subtle);">#00${v.id}</span></td>
+          <td>
+            <div style="font-weight:700; color:#fff;">${escapeHtml(v.name)}</div>
+            <div style="font-size:11px; color:var(--text-subtle);">Role: ${v.role}</div>
+          </td>
+          <td>
+            <div>${escapeHtml(v.email)}</div>
+            <div style="font-size:12px; color:var(--text-subtle);">${v.phone ? escapeHtml(v.phone) : '—'}</div>
+          </td>
+          <td>
+            <span class="status-badge ${v.status}">${v.status === 'suspended' ? 'REJECTED' : v.status.toUpperCase()}</span>
+          </td>
+          <td>
+            <div style="display:flex; gap:8px; align-items:center;">
+              ${v.status !== 'active' ? `
+                <button class="btn-action-approve" onclick="handleSetStatus(${v.id}, 'active', '${escapeHtml(v.name)}')">
+                  ✓ Approve
+                </button>
+              ` : ''}
+              ${v.status !== 'suspended' ? `
+                <button class="btn-action-reject" onclick="handleSetStatus(${v.id}, 'suspended', '${escapeHtml(v.name)}')">
+                  🚫 Reject
+                </button>
+              ` : ''}
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function handleAdminRegisterVendor(event) {
+      event.preventDefault();
+      const btn = document.getElementById('btn-reg-submit');
+      btn.disabled = true;
+      btn.textContent = 'Registering...';
+
+      const payload = {
+        name: document.getElementById('reg-name').value.trim(),
+        email: document.getElementById('reg-email').value.trim(),
+        password: document.getElementById('reg-password').value.trim(),
+        phone: document.getElementById('reg-phone').value.trim() || null
+      };
+
+      try {
+        const response = await fetch(`${API_BASE}/vendors/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.detail || 'Vendor registration failed');
+
+        showToast(`Vendor "${result.name}" registered successfully (Status: PENDING)`, 'success');
+        document.getElementById('vendor-reg-form').reset();
+        handleRefreshDashboard();
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Register Vendor';
+      }
+    }
+
+    // REQUIREMENT 1: REJECTED TERMINOLOGY IN TOAST NOTIFICATION
+    async function handleSetStatus(vendorId, newStatus, vendorName) {
+      try {
+        const response = await fetch(`${API_BASE}/vendors/${vendorId}/status`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
+
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.detail || 'Status update failed');
+
+        const displayLabel = newStatus === 'suspended' ? 'REJECTED' : newStatus.toUpperCase();
+        showToast(`Vendor "${vendorName}" status set to ${displayLabel}`, 'success');
+        handleRefreshDashboard();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `<span>${type === 'success' ? '✅' : '⚠️'}</span><span>${escapeHtml(message)}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, match => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[match]);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ShopSense OS — Vendor Portal & Catalog Management</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ==========================================================================
+       DARK GLASSMORPHISM SAAS DESIGN SYSTEM (Vendor Portal)
+       ========================================================================== */
+    :root {
+      --bg-base: #070a12;
+      --bg-surface: rgba(17, 24, 39, 0.8);
+      --bg-card: rgba(26, 35, 54, 0.75);
+      --bg-card-hover: rgba(34, 45, 68, 0.9);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-color-glow: rgba(99, 102, 241, 0.4);
+
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-subtle: #64748b;
+
+      --accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #3b82f6 100%);
+      --accent-ai-gradient: linear-gradient(135deg, #ec4899 0%, #8b5cf6 50%, #3b82f6 100%);
+      --accent-sale-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      --accent-purple: #8b5cf6;
+      --accent-indigo: #6366f1;
+      --accent-emerald: #10b981;
+      --accent-pink: #ec4899;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+
+      --shadow-card: 0 12px 36px -6px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--border-color);
+      --shadow-glow: 0 0 25px rgba(99, 102, 241, 0.3);
+      --shadow-ai-glow: 0 0 25px rgba(236, 72, 153, 0.3);
+
+      --transition-fast: 150ms cubic-bezier(0.16, 1, 0.3, 1);
+      --transition-normal: 250ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-base);
+      background-image: 
+        radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 45%);
+      color: var(--text-main);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-base); }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+
+    /* SIDEBAR */
+    .app-sidebar {
+      width: 260px; background: rgba(17, 24, 39, 0.85);
+      backdrop-filter: blur(20px); border-right: 1px solid var(--border-color);
+      display: flex; flex-direction: column; padding: 24px 16px;
+      gap: 32px; z-index: 10; flex-shrink: 0;
+    }
+
+    .brand-container { display: flex; align-items: center; gap: 12px; padding: 0 8px; }
+
+    .brand-logo-icon {
+      width: 42px; height: 42px; border-radius: var(--radius-md);
+      background: var(--accent-gradient); display: flex; align-items: center; justify-content: center;
+      box-shadow: var(--shadow-glow);
+    }
+
+    .brand-logo-icon svg { width: 22px; height: 22px; fill: #ffffff; }
+
+    .brand-text {
+      font-size: 20px; font-weight: 800; letter-spacing: -0.5px;
+      background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .brand-badge {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      padding: 2px 6px; border-radius: 4px; background: rgba(59, 130, 246, 0.2);
+      color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .nav-menu { display: flex; flex-direction: column; gap: 6px; list-style: none; }
+
+    .nav-item-btn {
+      width: 100%; display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px; border-radius: var(--radius-md);
+      background: transparent; border: 1px solid transparent;
+      color: var(--text-muted); font-size: 14px; font-weight: 500;
+      cursor: pointer; transition: all var(--transition-normal); text-align: left; position: relative;
+    }
+
+    .nav-item-btn svg { width: 20px; height: 20px; stroke: var(--text-muted); fill: none; stroke-width: 2; }
+
+    .nav-item-btn.active {
+      background: rgba(99, 102, 241, 0.15); border: 1px solid var(--border-color-glow);
+      color: #ffffff; font-weight: 600; box-shadow: 0 4px 16px rgba(99, 102, 241, 0.2);
+    }
+    .nav-item-btn.active::before {
+      content: ''; position: absolute; left: 0; top: 20%; height: 60%; width: 3px;
+      background: var(--accent-indigo); border-radius: 0 3px 3px 0; box-shadow: 0 0 8px var(--accent-indigo);
+    }
+    .nav-item-btn.active svg { stroke: #818cf8; }
+
+    .sidebar-footer {
+      margin-top: auto; padding: 16px; background: rgba(255, 255, 255, 0.02);
+      border-radius: var(--radius-md); border: 1px solid var(--border-color);
+      display: flex; flex-direction: column; gap: 12px;
+    }
+
+    .btn-logout {
+      background: rgba(244, 63, 94, 0.15); color: #f87171; border: 1px solid rgba(244, 63, 94, 0.3);
+      font-size: 13px; font-weight: 600; padding: 8px 12px; border-radius: var(--radius-sm);
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+      transition: all var(--transition-fast);
+    }
+    .btn-logout:hover { background: rgba(244, 63, 94, 0.25); }
+
+    /* MAIN CONTAINER */
+    .app-main {
+      flex: 1; display: flex; flex-direction: column;
+      height: 100vh; overflow-y: auto; background: transparent;
+    }
+
+    .header-bar {
+      height: 84px; padding: 0 36px; border-bottom: 1px solid var(--border-color);
+      background: rgba(17, 24, 39, 0.6); backdrop-filter: blur(20px);
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 5;
+    }
+
+    .header-title-container { display: flex; flex-direction: column; gap: 2px; }
+
+    .header-title { font-size: 34px; font-weight: 900; color: #ffffff; letter-spacing: -0.8px; }
+    .header-subtitle { font-size: 12px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .btn-ai-submit {
+      background: var(--accent-ai-gradient); color: #ffffff; font-weight: 700; font-size: 14px;
+      padding: 12px 24px; border-radius: var(--radius-md); border: none; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 8px; box-shadow: var(--shadow-ai-glow);
+      transition: all var(--transition-normal);
+    }
+    .btn-ai-submit:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 0 30px rgba(236, 72, 153, 0.5); }
+
+    /* REQUIREMENT 1: RECORD SALE BUTTON */
+    .btn-sale-action {
+      background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);
+      font-size: 11px; font-weight: 700; padding: 5px 10px; border-radius: var(--radius-sm);
+      cursor: pointer; transition: all var(--transition-fast); display: inline-flex; align-items: center; gap: 4px;
+    }
+    .btn-sale-action:hover { background: rgba(16, 185, 129, 0.3); transform: scale(1.03); }
+
+    .btn-secondary {
+      background: var(--bg-card); color: var(--text-main); font-weight: 500; font-size: 13px;
+      padding: 8px 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color);
+      cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all var(--transition-fast);
+    }
+    .btn-secondary:hover { background: var(--bg-card-hover); border-color: var(--border-color-glow); }
+
+    /* CONTENT AREA */
+    .content-area { padding: 36px; display: flex; flex-direction: column; gap: 32px; max-width: 1400px; width: 100%; margin: 0 auto; }
+
+    /* CARDS & GLASSMORPHISM */
+    .card-panel {
+      background: var(--bg-card); backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color); border-radius: var(--radius-lg);
+      padding: 26px; box-shadow: var(--shadow-card); display: flex; flex-direction: column; gap: 20px;
+    }
+
+    .panel-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 16px; }
+    .panel-title { font-size: 17px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
+
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full-width { grid-column: 1 / -1; }
+    .form-label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+
+    .form-input, .form-textarea {
+      background: rgba(17, 24, 39, 0.8); border: 1px solid var(--border-color);
+      border-radius: var(--radius-md); padding: 12px 16px; color: var(--text-main);
+      font-size: 14px; font-family: inherit; outline: none; transition: all var(--transition-fast);
+    }
+    .form-textarea { resize: vertical; min-height: 80px; }
+    .form-input:focus, .form-textarea:focus { border-color: var(--accent-pink); box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.2); }
+
+    /* TABLE */
+    .table-responsive { width: 100%; overflow-x: auto; }
+    .data-table { width: 100%; border-collapse: collapse; text-align: left; }
+    .data-table th { padding: 14px 16px; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-subtle); border-bottom: 1px solid var(--border-color); }
+    .data-table td { padding: 16px; font-size: 14px; color: var(--text-muted); border-bottom: 1px solid rgba(255, 255, 255, 0.04); vertical-align: top; }
+    .data-table tr:hover td { background: rgba(255, 255, 255, 0.02); color: var(--text-main); }
+
+    .product-img-thumb {
+      width: 54px; height: 54px; border-radius: var(--radius-md); object-fit: cover;
+      background: var(--bg-surface); border: 1px solid var(--border-color);
+    }
+
+    .product-img-placeholder {
+      width: 54px; height: 54px; border-radius: var(--radius-md);
+      background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.25);
+      display: flex; align-items: center; justify-content: center; color: #818cf8; font-size: 22px;
+    }
+
+    .category-badge {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      padding: 3px 8px; border-radius: 6px; background: rgba(236, 72, 153, 0.15);
+      color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.3); display: inline-block; margin-top: 4px;
+    }
+
+    .tag-pill-container { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+    .tag-pill {
+      font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 12px;
+      background: rgba(99, 102, 241, 0.15); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.25);
+    }
+
+    .low-stock-badge {
+      font-size: 11px; font-weight: 800; text-transform: uppercase; padding: 4px 10px;
+      border-radius: 12px; background: rgba(245, 158, 11, 0.25); color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.5); display: inline-flex; align-items: center; gap: 4px;
+      animation: pulseGlow 1.5s infinite alternate; margin-top: 4px;
+    }
+    @keyframes pulseGlow {
+      from { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); transform: scale(1); }
+      to { box-shadow: 0 0 14px 4px rgba(245, 158, 11, 0.6); transform: scale(1.03); }
+    }
+
+    /* MODALS */
+    .modal-backdrop {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(7, 10, 18, 0.85); backdrop-filter: blur(12px);
+      display: none; align-items: center; justify-content: center; z-index: 100;
+    }
+    .modal-backdrop.active { display: flex; }
+    .modal-box {
+      background: rgba(26, 35, 54, 0.95); backdrop-filter: blur(24px);
+      border: 1px solid var(--border-color-glow); border-radius: var(--radius-xl);
+      width: 90%; max-width: 680px; padding: 32px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.7), var(--shadow-glow);
+      display: flex; flex-direction: column; gap: 20px; max-height: 92vh; overflow-y: auto;
+    }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 14px; }
+    .modal-title { font-size: 20px; font-weight: 800; color: var(--text-main); }
+    .close-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 20px; }
+
+    .modal-product-img-box {
+      width: 300px; height: 300px; border-radius: var(--radius-lg); object-fit: cover;
+      background: rgba(17, 24, 39, 0.8); border: 1px solid var(--border-color-glow);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.5); flex-shrink: 0; margin: 0 auto;
+    }
+
+    .modal-product-img-placeholder {
+      width: 300px; height: 300px; border-radius: var(--radius-lg);
+      background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.25);
+      display: flex; align-items: center; justify-content: center; font-size: 64px; margin: 0 auto;
+    }
+
+    .email-preview-box {
+      background: rgba(17, 24, 39, 0.8); border: 1px solid var(--border-color);
+      border-radius: var(--radius-md); padding: 18px; font-size: 13px; color: var(--text-main);
+      white-space: pre-wrap; font-family: monospace; line-height: 1.6; max-height: 280px; overflow-y: auto;
+    }
+
+    /* TOAST */
+    .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 200; display: flex; flex-direction: column; gap: 10px; }
+    .toast { background: var(--bg-card); border: 1px solid var(--border-color); padding: 14px 20px; border-radius: var(--radius-md); box-shadow: 0 10px 30px rgba(0,0,0,0.5); color: var(--text-main); font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; animation: slideIn 300ms ease forwards; }
+    .toast.success { border-color: rgba(16, 185, 129, 0.4); }
+    .toast.error { border-color: rgba(244, 63, 94, 0.4); }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="app-sidebar">
+    <div class="brand-container">
+      <div class="brand-logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+      </div>
+      <div>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span class="brand-text">ShopSense</span>
+          <span class="brand-badge">Vendor</span>
+        </div>
+        <div style="font-size: 11px; color: var(--text-subtle);">Merchant Portal</div>
+      </div>
+    </div>
+
+    <ul class="nav-menu">
+      <li>
+        <button class="nav-item-btn active">
+          <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          My Catalog
+        </button>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <div style="display:flex; flex-direction:column; gap:2px;">
+        <span style="font-size:13px; font-weight:700; color:#fff;" id="vendor-display-name">Vendor</span>
+        <span style="font-size:11px; color:var(--text-muted);" id="vendor-display-email">vendor@domain.com</span>
+      </div>
+      <button class="btn-logout" onclick="handleLogout()">
+        <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTAINER -->
+  <main class="app-main">
+    <header class="header-bar">
+      <div class="header-title-container">
+        <h1 class="header-title" id="welcome-title">Welcome, Vendor</h1>
+        <span class="header-subtitle" id="vendor-id-subtitle">VENDOR DASHBOARD — ID: #0</span>
+      </div>
+      <button class="btn-secondary" onclick="handleRefreshCatalog()">
+        🔄 Refresh Catalog
+      </button>
+    </header>
+
+    <div class="content-area">
+
+      <!-- SECTION 1: ADD PRODUCT FORM -->
+      <div class="card-panel">
+        <div class="panel-header">
+          <h2 class="panel-title">
+            <svg style="width:20px;height:20px;stroke:var(--accent-pink);fill:none;stroke-width:2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Add New Product
+          </h2>
+        </div>
+
+        <form id="product-form" onsubmit="handleAddProductSubmit(event)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label" for="prod-name">Product Name</label>
+              <input class="form-input" type="text" id="prod-name" placeholder="e.g. Galaxy Watch 6" required />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="prod-price">Base Price (₹ INR)</label>
+              <input class="form-input" type="number" step="0.01" min="0.01" id="prod-price" placeholder="24999.00" required />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="prod-stock">Initial Stock Quantity</label>
+              <input class="form-input" type="number" min="0" id="prod-stock" placeholder="25" required />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="prod-image">Product Image (File Upload)</label>
+              <input class="form-input" type="file" id="prod-image" accept="image/*" onchange="handleImageFileSelect(event)" />
+            </div>
+
+            <div class="form-group full-width">
+              <label class="form-label" for="prod-desc">Basic Description</label>
+              <textarea class="form-textarea" id="prod-desc" placeholder="Describe basic product features (e.g., wireless noise canceling earbuds with 30hr battery life)..." required></textarea>
+            </div>
+          </div>
+
+          <div style="margin-top: 18px; display: flex; justify-content: flex-end;">
+            <button class="btn-ai-submit" type="submit" id="btn-save-product">
+              ✨ Generate AI Tags & Save Product
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- SECTION 2: MY CATALOG TABLE WITH RECORD SALE FEATURE -->
+      <div class="card-panel">
+        <div class="panel-header">
+          <h2 class="panel-title">
+            <svg style="width:20px;height:20px;stroke:var(--accent-purple);fill:none;stroke-width:2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            My Product Catalog
+          </h2>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Product & Vision Category</th>
+                <th>Description</th>
+                <th>Price (₹ INR)</th>
+                <th>Stock Qty</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="catalog-table-body">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- MODAL 1: PRODUCT DETAILS MODAL -->
+  <div class="modal-backdrop" id="view-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title" id="view-prod-name">Product Details</h3>
+        <button class="close-btn" onclick="closeModal('view-modal')">✕</button>
+      </div>
+
+      <div style="display:flex; flex-direction:column; align-items:center; gap:16px;">
+        <div id="view-prod-img-box"></div>
+        
+        <div style="display:flex; flex-direction:column; align-items:center; gap:4px; text-align:center;">
+          <div style="font-size:12px; color:var(--text-muted);" id="view-prod-id">Product ID: #0</div>
+          <div class="category-badge" id="view-prod-category">VISION: Electronics</div>
+          <div style="font-size:28px; font-weight:900; color:#34d399; margin-top:4px;" id="view-prod-price">₹0.00</div>
+          <div style="font-size:14px; font-weight:700; color:#fff;" id="view-prod-stock">Stock: 0 units</div>
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <span style="font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Product Description</span>
+        <div style="font-size:13px; color:var(--text-main); background:rgba(17,24,39,0.8); padding:14px; border-radius:var(--radius-md); border:1px solid var(--border-color); line-height:1.5;" id="view-prod-desc">
+          --
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <span style="font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">SEO Keyword Tags</span>
+        <div class="tag-pill-container" id="view-prod-tags"></div>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; margin-top:8px;">
+        <button class="btn-secondary" onclick="closeModal('view-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: AI MARKETING STUDIO EMAIL MODAL -->
+  <div class="modal-backdrop" id="email-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">✉️ AI Marketing Studio</h3>
+        <button class="close-btn" onclick="closeModal('email-modal')">✕</button>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <span style="font-size:12px; font-weight:700; color:var(--accent-pink); text-transform:uppercase;">Subject Line</span>
+        <div style="font-size:14px; font-weight:700; color:#fff; background:rgba(17,24,39,0.8); padding:12px 14px; border-radius:var(--radius-md); border:1px solid var(--border-color);" id="email-subject-box">
+          --
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <span style="font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Generated Promotional Email Body</span>
+        <div class="email-preview-box" id="email-body-box">--</div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+        <span style="font-size:12px; color:var(--text-muted);">Ready to send to your customer mailing list</span>
+        <button class="btn-ai-submit" style="padding:8px 16px; font-size:13px;" onclick="copyEmailContent()">
+          📋 Copy Email Content
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- JAVASCRIPT APP LOGIC -->
+  <script>
+    const API_BASE = window.location.origin.includes('http') ? window.location.origin : 'http://127.0.0.1:8000';
+    let base64ImageString = null;
+    let vendorId = null;
+    let vendorProductsMap = {};
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const token = sessionStorage.getItem('access_token');
+      const role = sessionStorage.getItem('role');
+      vendorId = sessionStorage.getItem('vendor_id');
+
+      if (!token || role !== 'vendor' || !vendorId) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const vendorName = sessionStorage.getItem('name') || 'Merchant';
+      const vendorEmail = sessionStorage.getItem('email') || 'vendor@domain.com';
+
+      document.getElementById('welcome-title').textContent = `Welcome, ${vendorName}`;
+      document.getElementById('vendor-id-subtitle').textContent = `VENDOR DASHBOARD — ID: #${vendorId}`;
+      document.getElementById('vendor-display-name').textContent = vendorName;
+      document.getElementById('vendor-display-email').textContent = vendorEmail;
+
+      loadMyCatalog();
+    });
+
+    function handleLogout() {
+      sessionStorage.clear();
+      window.location.href = 'login.html';
+    }
+
+    async function handleRefreshCatalog() {
+      await loadMyCatalog();
+      showToast('Product catalog refreshed!', 'success');
+    }
+
+    function handleImageFileSelect(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          base64ImageString = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      } else {
+        base64ImageString = null;
+      }
+    }
+
+    function generateAIContent(name, basicDesc) {
+      const text = (name + ' ' + basicDesc).toLowerCase();
+
+      let category = 'Electronics';
+      if (text.includes('shirt') || text.includes('hoodie') || text.includes('apparel') || text.includes('jacket') || text.includes('wear')) {
+        category = 'Fashion & Apparel';
+      } else if (text.includes('speaker') || text.includes('headphone') || text.includes('earbud') || text.includes('sound') || text.includes('audio')) {
+        category = 'Audio & Acoustics';
+      } else if (text.includes('watch') || text.includes('band') || text.includes('fitness') || text.includes('smartwatch')) {
+        category = 'Wearables & Smart Devices';
+      } else if (text.includes('home') || text.includes('kitchen') || text.includes('living') || text.includes('light')) {
+        category = 'Home & Living';
+      }
+
+      const cleanName = name.trim();
+      const cleanDesc = basicDesc.trim();
+      const enhancedDesc = `Experience unmatched performance with the all-new ${cleanName}. Engineered with state-of-the-art craftsmanship: "${cleanDesc}". Perfect for modern lifestyle enthusiasts seeking premium quality, reliability, and value.`;
+
+      const tagsSet = new Set();
+      if (text.includes('wireless') || text.includes('bluetooth')) tagsSet.add('#WirelessTech');
+      if (text.includes('noise') || text.includes('canceling')) tagsSet.add('#NoiseCancel');
+      if (text.includes('smart') || text.includes('watch')) tagsSet.add('#SmartDevice');
+      if (text.includes('hd') || text.includes('4k') || text.includes('display')) tagsSet.add('#UltraHD');
+      if (text.includes('battery') || text.includes('power')) tagsSet.add('#LongBattery');
+      if (text.includes('water') || text.includes('waterproof')) tagsSet.add('#IPX7Waterproof');
+
+      const nameWords = cleanName.split(/\s+/).filter(w => w.length > 3).slice(0, 2);
+      nameWords.forEach(w => tagsSet.add(`#${w.replace(/[^a-zA-Z0-9]/g, '')}`));
+      tagsSet.add('#PremiumQuality');
+      tagsSet.add('#TopRated2026');
+
+      const tagsList = Array.from(tagsSet).slice(0, 5);
+
+      return {
+        category: `VISION: ${category}`,
+        enhancedDesc: enhancedDesc,
+        tagsString: tagsList.join(','),
+        tagsList: tagsList
+      };
+    }
+
+    // REQUIREMENT 1: RECORD SALE BUTTON TERMINOLOGY AND ACTION
+    async function loadMyCatalog() {
+      const tbody = document.getElementById('catalog-table-body');
+      try {
+        const response = await fetch(`${API_BASE}/vendors/${vendorId}/products`);
+        if (!response.ok) throw new Error('Failed to fetch catalog products');
+        const products = await response.json();
+
+        vendorProductsMap = {};
+        products.forEach(p => { vendorProductsMap[p.id] = p; });
+
+        if (products.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:36px; color:var(--text-subtle);">Your catalog is currently empty. Use the form above to add your first product!</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = products.map(p => {
+          const tagsArray = p.tags ? p.tags.split(',') : [];
+          const isLowStock = p.stock_qty < 10;
+
+          return `
+            <tr>
+              <td>
+                ${p.image_url ? `<img class="product-img-thumb" src="${p.image_url}" alt="${escapeHtml(p.name)}" />` : `<div class="product-img-placeholder">📦</div>`}
+              </td>
+              <td>
+                <div style="font-weight:700; color:#fff;">${escapeHtml(p.name)}</div>
+                <div class="category-badge">${p.category ? escapeHtml(p.category) : 'VISION: Electronics'}</div>
+              </td>
+              <td>
+                <div style="font-size:13px; color:var(--text-main); line-height:1.4;">${escapeHtml(p.description || '')}</div>
+                <div class="tag-pill-container">
+                  ${tagsArray.map(t => `<span class="tag-pill">${escapeHtml(t)}</span>`).join('')}
+                </div>
+              </td>
+              <td>
+                <span style="font-weight:800; color:#34d399;">₹${p.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+              </td>
+              <td>
+                <div style="display:flex; flex-direction:column; align-items:flex-start;">
+                  <span style="font-weight:700; color:#fff;">${p.stock_qty} units</span>
+                  ${isLowStock ? `<span class="low-stock-badge">⚠️ Low Stock (${p.stock_qty} left)</span>` : ''}
+                </div>
+              </td>
+              <td>
+                <div style="display:flex; gap:6px; flex-direction:column;">
+                  <!-- REQUIREMENT 1: RECORD SALE BUTTON -->
+                  <button class="btn-sale-action" onclick="handleRecordSale(${p.id}, '${escapeHtml(p.name)}')">
+                    🛒 Record Sale
+                  </button>
+                  <button class="btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="openViewProductModal(${p.id})">
+                    👁️ View
+                  </button>
+                  <button class="btn-secondary" style="font-size:11px; padding:4px 8px; color:var(--accent-pink); border-color:rgba(236,72,153,0.3);" onclick="openAIEmailModal(${p.id})">
+                    ✉️ AI Email
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--accent-rose); padding:24px;">Failed to load product catalog.</td></tr>`;
+      }
+    }
+
+    // REQUIREMENT 1 HANDLER: RECORD SALE ACTION WITH TOAST
+    async function handleRecordSale(productId, productName) {
+      try {
+        const response = await fetch(`${API_BASE}/products/${productId}/simulate-sale`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.detail || 'Sale recording failed');
+
+        showToast(`🎉 Sale Recorded! Sold 1x "${productName}" (₹${result.sale_amount.toLocaleString('en-IN')})`, 'success');
+        loadMyCatalog();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function handleAddProductSubmit(event) {
+      event.preventDefault();
+      const btn = document.getElementById('btn-save-product');
+      btn.disabled = true;
+      btn.innerHTML = '✨ Generating AI Copy & Tags...';
+
+      const rawName = document.getElementById('prod-name').value.trim();
+      const rawDesc = document.getElementById('prod-desc').value.trim();
+      const price = parseFloat(document.getElementById('prod-price').value);
+      const stock = parseInt(document.getElementById('prod-stock').value);
+
+      const aiData = generateAIContent(rawName, rawDesc);
+
+      const payload = {
+        vendor_id: parseInt(vendorId),
+        name: rawName,
+        price: price,
+        stock_qty: stock,
+        description: aiData.enhancedDesc,
+        image_url: base64ImageString,
+        category: aiData.category,
+        tags: aiData.tagsString
+      };
+
+      try {
+        const response = await fetch(`${API_BASE}/products`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.detail || 'Failed to save product');
+
+        showToast(`Product "${result.name}" saved with AI tags!`, 'success');
+        document.getElementById('product-form').reset();
+        base64ImageString = null;
+
+        loadMyCatalog();
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '✨ Generate AI Tags & Save Product';
+      }
+    }
+
+    function openViewProductModal(productId) {
+      const p = vendorProductsMap[productId];
+      if (!p) return;
+
+      document.getElementById('view-prod-name').textContent = p.name;
+      document.getElementById('view-prod-id').textContent = `Product ID: #${p.id}`;
+      document.getElementById('view-prod-category').textContent = p.category || 'VISION: Electronics';
+      document.getElementById('view-prod-price').textContent = `₹${p.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+      document.getElementById('view-prod-stock').textContent = `Stock: ${p.stock_qty} units`;
+      document.getElementById('view-prod-desc').textContent = p.description || 'No description';
+
+      const imgBox = document.getElementById('view-prod-img-box');
+      if (p.image_url) {
+        imgBox.innerHTML = `<img class="modal-product-img-box" src="${p.image_url}" alt="${escapeHtml(p.name)}" />`;
+      } else {
+        imgBox.innerHTML = `<div class="modal-product-img-placeholder">📦</div>`;
+      }
+
+      const tagsContainer = document.getElementById('view-prod-tags');
+      const tagsArray = p.tags ? p.tags.split(',') : [];
+      tagsContainer.innerHTML = tagsArray.map(t => `<span class="tag-pill">${escapeHtml(t)}</span>`).join('');
+
+      document.getElementById('view-modal').classList.add('active');
+    }
+
+    function openAIEmailModal(productId) {
+      const p = vendorProductsMap[productId];
+      if (!p) return;
+
+      const subject = `🚀 Exclusive Product Launch: Introducing the ${p.name}!`;
+      const body = `Hi {{Customer_Name}},\n\nWe are thrilled to present our newest arrival: the ${p.name}!\n\n${p.description}\n\nProduct Overview:\n- Category: ${p.category || 'VISION: Electronics'}\n- Retail Price: ₹${p.price.toLocaleString('en-IN')}\n- SEO Tags: ${(p.tags || '').replace(/,/g, ' ')}\n\nAvailable in limited quantities. Order yours today!\n\nBest regards,\nThe ${sessionStorage.getItem('name') || 'ShopSense'} Sales Team`;
+
+      document.getElementById('email-subject-box').textContent = subject;
+      document.getElementById('email-body-box').textContent = body;
+      document.getElementById('email-modal').classList.add('active');
+    }
+
+    function copyEmailContent() {
+      const subject = document.getElementById('email-subject-box').textContent;
+      const body = document.getElementById('email-body-box').textContent;
+      const fullText = `Subject: ${subject}\n\n${body}`;
+
+      navigator.clipboard.writeText(fullText).then(() => {
+        showToast('AI Email content copied to clipboard!', 'success');
+      }).catch(() => {
+        showToast('Failed to copy content.', 'error');
+      });
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `<span>${type === 'success' ? '✅' : '⚠️'}</span><span>${escapeHtml(message)}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, match => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[match]);
+    }
+  </script>
+</body>
+</html>
