@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Text
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -42,6 +42,7 @@ class Product(Base):
     # Relationships
     vendor = relationship("Vendor", back_populates="products")
     transactions = relationship("Transaction", back_populates="product", cascade="all, delete-orphan")
+    reviews = relationship("Review", back_populates="product", cascade="all, delete-orphan")
 
 
 class Customer(Base):
@@ -76,6 +77,27 @@ class Transaction(Base):
     product = relationship("Product", back_populates="transactions")
 
 
+class Review(Base):
+    """
+    Represents customer product reviews with rule-based sentiment scoring & extracted pros/cons (Milestone 2).
+    """
+    __tablename__ = "reviews"
+
+    id = Column(Integer, primary_key=True, index=True)
+    product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
+    customer_name = Column(String, nullable=False)
+    review_text = Column(Text, nullable=False)
+    rating = Column(Integer, nullable=False)  # 1 to 5
+    sentiment_score = Column(Float, nullable=False, default=0.0)  # -1.0 to +1.0
+    sentiment_label = Column(String, nullable=False, default="Neutral")  # "Positive", "Neutral", "Negative"
+    pros = Column(String, nullable=True)  # extracted pros
+    cons = Column(String, nullable=True)  # extracted cons
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    # Relationships
+    product = relationship("Product", back_populates="reviews")
+
+
 class ActivityLog(Base):
     """
     Represents live system activity events across ShopSense with UTC timezone support.
@@ -83,6 +105,6 @@ class ActivityLog(Base):
     __tablename__ = "activity_logs"
 
     id = Column(Integer, primary_key=True, index=True)
-    event_type = Column(String, nullable=False)  # "vendor_registered", "status_changed", "product_added", "sale_simulated"
+    event_type = Column(String, nullable=False)  # "vendor_registered", "status_changed", "product_added", "sale_simulated", "review_added"
     description = Column(String, nullable=False)
     timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc))

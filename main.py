@@ -8,7 +8,7 @@ from sqlalchemy import func, desc
 import models
 import schemas
 from database import engine, get_db, SessionLocal
-from routers import vendors, products
+from routers import vendors, products, inventory, customers, reviews, analytics
 from auth import hash_password
 
 # Create database tables automatically on startup if they do not exist
@@ -46,7 +46,7 @@ init_admin_user()
 app = FastAPI(
     title="ShopSense API",
     description="Multi-Vendor E-Commerce Analytics Platform with Auth & Activity Feed",
-    version="1.3.1"
+    version="2.3.0"
 )
 
 # Enable CORS Middleware
@@ -61,6 +61,10 @@ app.add_middleware(
 # Register endpoints from routers
 app.include_router(vendors.router)
 app.include_router(products.router)
+app.include_router(inventory.router)
+app.include_router(customers.router)
+app.include_router(reviews.router)
+app.include_router(analytics.router)
 
 
 @app.get("/")

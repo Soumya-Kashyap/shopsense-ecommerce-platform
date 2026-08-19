@@ -160,7 +160,6 @@
     }
     .btn-ai-submit:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 0 30px rgba(236, 72, 153, 0.5); }
 
-    /* REQUIREMENT 1: RECORD SALE BUTTON */
     .btn-sale-action {
       background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);
       font-size: 11px; font-weight: 700; padding: 5px 10px; border-radius: var(--radius-sm);
@@ -193,13 +192,13 @@
     .form-group.full-width { grid-column: 1 / -1; }
     .form-label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
 
-    .form-input, .form-textarea {
+    .form-input, .form-textarea, .form-select {
       background: rgba(17, 24, 39, 0.8); border: 1px solid var(--border-color);
       border-radius: var(--radius-md); padding: 12px 16px; color: var(--text-main);
       font-size: 14px; font-family: inherit; outline: none; transition: all var(--transition-fast);
     }
     .form-textarea { resize: vertical; min-height: 80px; }
-    .form-input:focus, .form-textarea:focus { border-color: var(--accent-pink); box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.2); }
+    .form-input:focus, .form-textarea:focus, .form-select:focus { border-color: var(--accent-pink); box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.2); }
 
     /* TABLE */
     .table-responsive { width: 100%; overflow-x: auto; }
@@ -237,6 +236,17 @@
       border: 1px solid rgba(245, 158, 11, 0.5); display: inline-flex; align-items: center; gap: 4px;
       animation: pulseGlow 1.5s infinite alternate; margin-top: 4px;
     }
+
+    .sentiment-badge { font-size: 11px; font-weight: 800; text-transform: uppercase; padding: 3px 10px; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px; }
+    .sentiment-badge.Positive { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+    .sentiment-badge.Neutral { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+    .sentiment-badge.Negative { background: rgba(244, 63, 94, 0.2); color: #f87171; border: 1px solid rgba(244, 63, 94, 0.4); }
+
+    .rank-badge { font-size: 12px; font-weight: 900; padding: 3px 8px; border-radius: var(--radius-sm); display: inline-flex; align-items: center; }
+    .rank-badge.rank-1 { background: rgba(245, 158, 11, 0.25); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.5); }
+    .rank-badge.rank-2 { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.4); }
+    .rank-badge.rank-3 { background: rgba(217, 119, 6, 0.2); color: #f59e0b; border: 1px solid rgba(217, 119, 6, 0.4); }
+
     @keyframes pulseGlow {
       from { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); transform: scale(1); }
       to { box-shadow: 0 0 14px 4px rgba(245, 158, 11, 0.6); transform: scale(1.03); }
@@ -252,24 +262,35 @@
     .modal-box {
       background: rgba(26, 35, 54, 0.95); backdrop-filter: blur(24px);
       border: 1px solid var(--border-color-glow); border-radius: var(--radius-xl);
-      width: 90%; max-width: 680px; padding: 32px;
+      width: 92%; max-width: 760px; padding: 32px;
       box-shadow: 0 24px 60px rgba(0,0,0,0.7), var(--shadow-glow);
-      display: flex; flex-direction: column; gap: 20px; max-height: 92vh; overflow-y: auto;
+      display: flex; flex-direction: column; gap: 24px; max-height: 92vh; overflow-y: auto;
     }
     .modal-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 14px; }
     .modal-title { font-size: 20px; font-weight: 800; color: var(--text-main); }
     .close-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 20px; }
 
     .modal-product-img-box {
-      width: 300px; height: 300px; border-radius: var(--radius-lg); object-fit: cover;
+      width: 240px; height: 240px; border-radius: var(--radius-lg); object-fit: cover;
       background: rgba(17, 24, 39, 0.8); border: 1px solid var(--border-color-glow);
       box-shadow: 0 12px 32px rgba(0,0,0,0.5); flex-shrink: 0; margin: 0 auto;
     }
 
     .modal-product-img-placeholder {
-      width: 300px; height: 300px; border-radius: var(--radius-lg);
+      width: 240px; height: 240px; border-radius: var(--radius-lg);
       background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.25);
-      display: flex; align-items: center; justify-content: center; font-size: 64px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: center; font-size: 54px; margin: 0 auto;
+    }
+
+    .sentiment-bar-container { display: flex; flex-direction: column; gap: 8px; background: rgba(17, 24, 39, 0.6); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); }
+    .sentiment-bar { height: 10px; border-radius: 5px; background: #1e293b; overflow: hidden; display: flex; }
+    .sentiment-seg-pos { background: var(--accent-emerald); transition: width 300ms ease; }
+    .sentiment-seg-neu { background: var(--accent-amber); transition: width 300ms ease; }
+    .sentiment-seg-neg { background: var(--accent-rose); transition: width 300ms ease; }
+
+    .review-item-card {
+      background: rgba(17, 24, 39, 0.6); border: 1px solid var(--border-color);
+      border-radius: var(--radius-md); padding: 14px 16px; display: flex; flex-direction: column; gap: 8px;
     }
 
     .email-preview-box {
@@ -383,7 +404,7 @@
         </form>
       </div>
 
-      <!-- SECTION 2: MY CATALOG TABLE WITH RECORD SALE FEATURE -->
+      <!-- SECTION 2: MY CATALOG TABLE WITH RESTOCK & RECORD SALE FEATURE -->
       <div class="card-panel">
         <div class="panel-header">
           <h2 class="panel-title">
@@ -411,47 +432,165 @@
         </div>
       </div>
 
+      <!-- SECTION 3: TOP PRODUCTS IN YOUR CATEGORY RECOMMENDATION WIDGET -->
+      <div class="card-panel">
+        <div class="panel-header">
+          <h2 class="panel-title">
+            🔥 Top Products in Sector: <span id="sector-category-name" style="color:var(--accent-pink); font-weight:800;">Electronics</span>
+          </h2>
+          <span style="font-size:12px; color:var(--text-muted);">Rule-based best sellers in your domain</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Product Name</th>
+                <th>Vendor Identity</th>
+                <th>Category</th>
+                <th>Units Sold</th>
+                <th>Price (₹ INR)</th>
+              </tr>
+            </thead>
+            <tbody id="top-sector-products-body">
+              <!-- Dynamically populated via GET /products/top-selling?category=...&limit=3 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
   </main>
 
-  <!-- MODAL 1: PRODUCT DETAILS MODAL -->
+  <!-- MODAL 1: PRODUCT DETAILS & SENTIMENT ANALYSIS MODAL -->
   <div class="modal-backdrop" id="view-modal">
     <div class="modal-box">
       <div class="modal-header">
-        <h3 class="modal-title" id="view-prod-name">Product Details</h3>
+        <h3 class="modal-title" id="view-prod-name">Product Details & Sentiment Analysis</h3>
         <button class="close-btn" onclick="closeModal('view-modal')">✕</button>
       </div>
 
-      <div style="display:flex; flex-direction:column; align-items:center; gap:16px;">
+      <!-- Part A: Product Info Overview -->
+      <div style="display:flex; flex-direction:row; gap:20px; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:16px;">
         <div id="view-prod-img-box"></div>
         
-        <div style="display:flex; flex-direction:column; align-items:center; gap:4px; text-align:center;">
+        <div style="display:flex; flex-direction:column; gap:6px; flex:1;">
           <div style="font-size:12px; color:var(--text-muted);" id="view-prod-id">Product ID: #0</div>
           <div class="category-badge" id="view-prod-category">VISION: Electronics</div>
-          <div style="font-size:28px; font-weight:900; color:#34d399; margin-top:4px;" id="view-prod-price">₹0.00</div>
-          <div style="font-size:14px; font-weight:700; color:#fff;" id="view-prod-stock">Stock: 0 units</div>
+          <div style="font-size:26px; font-weight:900; color:#34d399; margin-top:2px;" id="view-prod-price">₹0.00</div>
+          <div style="font-size:13px; font-weight:700; color:#fff;" id="view-prod-stock">Stock: 0 units</div>
+          
+          <div style="font-size:12px; color:var(--text-main); background:rgba(17,24,39,0.6); padding:10px; border-radius:var(--radius-sm); border:1px solid var(--border-color); margin-top:4px;" id="view-prod-desc">
+            --
+          </div>
+          <div class="tag-pill-container" id="view-prod-tags"></div>
         </div>
       </div>
 
-      <div style="display:flex; flex-direction:column; gap:6px;">
-        <span style="font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Product Description</span>
-        <div style="font-size:13px; color:var(--text-main); background:rgba(17,24,39,0.8); padding:14px; border-radius:var(--radius-md); border:1px solid var(--border-color); line-height:1.5;" id="view-prod-desc">
-          --
+      <!-- Part B: Aggregate Sentiment Breakdown Summary -->
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <h4 style="font-size:15px; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+            📊 Reviews & Sentiment Analysis
+            <span style="font-size:13px; font-weight:600; color:var(--accent-amber);" id="sentiment-avg-rating">★ 0.0 / 5.0</span>
+          </h4>
+          <span style="font-size:12px; font-weight:700; color:var(--accent-emerald);" id="sentiment-pos-headline">0% Positive</span>
+        </div>
+
+        <div class="sentiment-bar-container">
+          <div class="sentiment-bar">
+            <div class="sentiment-seg-pos" id="sentiment-bar-pos" style="width:0%;"></div>
+            <div class="sentiment-seg-neu" id="sentiment-bar-neu" style="width:0%;"></div>
+            <div class="sentiment-seg-neg" id="sentiment-bar-neg" style="width:0%;"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:600; color:var(--text-muted);">
+            <div><span style="color:var(--accent-emerald);">●</span> Positive: <span id="sentiment-lbl-pos">0%</span></div>
+            <div><span style="color:var(--accent-amber);">●</span> Neutral: <span id="sentiment-lbl-neu">0%</span></div>
+            <div><span style="color:var(--accent-rose);">●</span> Negative: <span id="sentiment-lbl-neg">0%</span></div>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:12px;">
+          <div style="background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.25); padding:10px 12px; border-radius:var(--radius-sm);">
+            <div style="font-weight:700; color:#34d399; margin-bottom:4px;">👍 Extracted Pros:</div>
+            <div id="top-pros-list" style="color:var(--text-muted); line-height:1.4;">--</div>
+          </div>
+          <div style="background:rgba(244,63,94,0.08); border:1px solid rgba(244,63,94,0.25); padding:10px 12px; border-radius:var(--radius-sm);">
+            <div style="font-weight:700; color:#f87171; margin-bottom:4px;">👎 Extracted Cons:</div>
+            <div id="top-cons-list" style="color:var(--text-muted); line-height:1.4;">--</div>
+          </div>
         </div>
       </div>
 
-      <div style="display:flex; flex-direction:column; gap:6px;">
-        <span style="font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">SEO Keyword Tags</span>
-        <div class="tag-pill-container" id="view-prod-tags"></div>
+      <!-- Part C: Individual Customer Reviews List -->
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <h5 style="font-size:13px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Customer Reviews</h5>
+        <div id="reviews-list-container" style="display:flex; flex-direction:column; gap:10px; max-height:220px; overflow-y:auto;">
+          <!-- Dynamically populated -->
+        </div>
       </div>
 
-      <div style="display:flex; justify-content:flex-end; margin-top:8px;">
+      <!-- Part D: Submit Test Review Form -->
+      <div style="background:rgba(17,24,39,0.6); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:16px; display:flex; flex-direction:column; gap:12px;">
+        <h5 style="font-size:13px; font-weight:800; color:#fff; display:flex; align-items:center; gap:6px;">
+          ✍️ Submit Test Customer Review (Demo)
+        </h5>
+        
+        <div style="display:grid; grid-template-columns:2fr 1fr; gap:12px;">
+          <input class="form-input" type="text" id="modal-review-name" placeholder="Customer Name (e.g. Ananya Rao)" required style="padding:8px 12px; font-size:13px;" />
+          <select class="form-select" id="modal-review-rating" style="padding:8px 12px; font-size:13px;">
+            <option value="5">★★★★★ (5 Stars)</option>
+            <option value="4">★★★★☆ (4 Stars)</option>
+            <option value="3">★★★☆☆ (3 Stars)</option>
+            <option value="2">★★☆☆☆ (2 Stars)</option>
+            <option value="1">★☆☆☆☆ (1 Star)</option>
+          </select>
+        </div>
+        
+        <textarea class="form-textarea" id="modal-review-text" placeholder="Write review text (e.g. Amazing audio clarity and comfortable design!)..." style="min-height:54px; font-size:13px; padding:10px;"></textarea>
+
+        <div style="display:flex; justify-content:flex-end;">
+          <button class="btn-ai-submit" style="padding:8px 16px; font-size:13px;" onclick="handleAddTestReviewSubmit()">
+            ✨ Post Customer Review & Analyze Sentiment
+          </button>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; margin-top:4px;">
         <button class="btn-secondary" onclick="closeModal('view-modal')">Close</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL 2: AI MARKETING STUDIO EMAIL MODAL -->
+  <!-- MODAL 2: RESTOCK INVENTORY MODAL (REQUIREMENT 1) -->
+  <div class="modal-backdrop" id="restock-modal">
+    <div class="modal-box" style="max-width:440px;">
+      <div class="modal-header">
+        <h3 class="modal-title">📦 Restock Inventory</h3>
+        <button class="close-btn" onclick="closeModal('restock-modal')">✕</button>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div style="font-size:14px; color:#fff; font-weight:700;" id="restock-modal-prod-name">--</div>
+        <div style="font-size:12px; color:var(--text-muted);" id="restock-modal-current-stock">Current Stock: 0 units</div>
+
+        <div class="form-group" style="margin-top:8px;">
+          <label class="form-label" for="restock-qty-input">Quantity to Add</label>
+          <input class="form-input" type="number" id="restock-qty-input" value="20" min="1" required placeholder="e.g. 20" />
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:12px;">
+        <button class="btn-secondary" onclick="closeModal('restock-modal')">Cancel</button>
+        <button class="btn-gradient" onclick="handleConfirmRestockSubmit()">
+          📦 Confirm Restock
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: AI MARKETING STUDIO EMAIL MODAL -->
   <div class="modal-backdrop" id="email-modal">
     <div class="modal-box">
       <div class="modal-header">
@@ -489,6 +628,8 @@
     let base64ImageString = null;
     let vendorId = null;
     let vendorProductsMap = {};
+    let activeModalProductId = null;
+    let activeRestockProductId = null;
 
     document.addEventListener('DOMContentLoaded', () => {
       const token = sessionStorage.getItem('access_token');
@@ -518,7 +659,7 @@
 
     async function handleRefreshCatalog() {
       await loadMyCatalog();
-      showToast('Product catalog refreshed!', 'success');
+      showToast('Product catalog & sector recommendations refreshed!', 'success');
     }
 
     function handleImageFileSelect(event) {
@@ -575,7 +716,6 @@
       };
     }
 
-    // REQUIREMENT 1: RECORD SALE BUTTON TERMINOLOGY AND ACTION
     async function loadMyCatalog() {
       const tbody = document.getElementById('catalog-table-body');
       try {
@@ -585,6 +725,13 @@
 
         vendorProductsMap = {};
         products.forEach(p => { vendorProductsMap[p.id] = p; });
+
+        let primaryCategory = 'Audio & Acoustics';
+        if (products.length > 0 && products[0].category) {
+          primaryCategory = products[0].category.replace('VISION: ', '').trim();
+        }
+        document.getElementById('sector-category-name').textContent = primaryCategory;
+        loadTopSectorProducts(primaryCategory);
 
         if (products.length === 0) {
           tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:36px; color:var(--text-subtle);">Your catalog is currently empty. Use the form above to add your first product!</td></tr>`;
@@ -621,12 +768,14 @@
               </td>
               <td>
                 <div style="display:flex; gap:6px; flex-direction:column;">
-                  <!-- REQUIREMENT 1: RECORD SALE BUTTON -->
                   <button class="btn-sale-action" onclick="handleRecordSale(${p.id}, '${escapeHtml(p.name)}')">
                     🛒 Record Sale
                   </button>
+                  <button class="btn-secondary" style="font-size:11px; padding:4px 8px; color:#60a5fa; border-color:rgba(59,130,246,0.3);" onclick="openRestockModal(${p.id})">
+                    📦 Restock
+                  </button>
                   <button class="btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="openViewProductModal(${p.id})">
-                    👁️ View
+                    👁️ View & Reviews
                   </button>
                   <button class="btn-secondary" style="font-size:11px; padding:4px 8px; color:var(--accent-pink); border-color:rgba(236,72,153,0.3);" onclick="openAIEmailModal(${p.id})">
                     ✉️ AI Email
@@ -641,7 +790,214 @@
       }
     }
 
-    // REQUIREMENT 1 HANDLER: RECORD SALE ACTION WITH TOAST
+    async function loadTopSectorProducts(categoryName) {
+      const tbody = document.getElementById('top-sector-products-body');
+      try {
+        const response = await fetch(`${API_BASE}/products/top-selling?category=${encodeURIComponent(categoryName)}&limit=3`);
+        if (!response.ok) throw new Error('Sector products fetch error');
+        const topProducts = await response.json();
+
+        if (topProducts.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--text-subtle);">No sales recorded in this sector yet.</td></tr>`;
+          return;
+        }
+
+        const rankBadge = (index) => {
+          if (index === 0) return `<span class="rank-badge rank-1">🥇 #1</span>`;
+          if (index === 1) return `<span class="rank-badge rank-2">🥈 #2</span>`;
+          return `<span class="rank-badge rank-3">🥉 #3</span>`;
+        };
+
+        tbody.innerHTML = topProducts.map((p, idx) => `
+          <tr>
+            <td>${rankBadge(idx)}</td>
+            <td>
+              <div style="font-weight:700; color:#fff;">${escapeHtml(p.product_name)}</div>
+            </td>
+            <td>
+              <div style="font-weight:600; color:var(--text-main);">${escapeHtml(p.vendor_name)}</div>
+            </td>
+            <td>
+              <span class="category-badge">${escapeHtml(p.category || 'VISION: Electronics')}</span>
+            </td>
+            <td>
+              <span style="font-weight:800; color:#fff;">${p.units_sold} units</span>
+            </td>
+            <td>
+              <span style="font-weight:800; color:#34d399;">₹${p.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--accent-rose); padding:16px;">Failed to load sector recommendations.</td></tr>`;
+      }
+    }
+
+    // REQUIREMENT 1: RESTOCK MODAL HANDLERS
+    function openRestockModal(productId) {
+      const p = vendorProductsMap[productId];
+      if (!p) return;
+
+      activeRestockProductId = productId;
+      document.getElementById('restock-modal-prod-name').textContent = p.name;
+      document.getElementById('restock-modal-current-stock').textContent = `Current Stock: ${p.stock_qty} units`;
+      document.getElementById('restock-qty-input').value = 20;
+
+      document.getElementById('restock-modal').classList.add('active');
+    }
+
+    async function handleConfirmRestockSubmit() {
+      if (!activeRestockProductId) return;
+
+      const qtyInput = document.getElementById('restock-qty-input');
+      const qty = parseInt(qtyInput.value);
+
+      if (isNaN(qty) || qty <= 0) {
+        showToast('Please enter a valid restock quantity greater than 0', 'error');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/products/${activeRestockProductId}/restock`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ quantity: qty })
+        });
+
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.detail || 'Restock failed');
+
+        showToast(`📦 Restocked! ${result.product_name} stock increased to ${result.new_stock_qty} units.`, 'success');
+        closeModal('restock-modal');
+        loadMyCatalog();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function openViewProductModal(productId) {
+      activeModalProductId = productId;
+      const p = vendorProductsMap[productId];
+      if (!p) return;
+
+      document.getElementById('view-prod-name').textContent = p.name;
+      document.getElementById('view-prod-id').textContent = `Product ID: #${p.id}`;
+      document.getElementById('view-prod-category').textContent = p.category || 'VISION: Electronics';
+      document.getElementById('view-prod-price').textContent = `₹${p.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+      document.getElementById('view-prod-stock').textContent = `Stock: ${p.stock_qty} units`;
+      document.getElementById('view-prod-desc').textContent = p.description || 'No description';
+
+      const imgBox = document.getElementById('view-prod-img-box');
+      if (p.image_url) {
+        imgBox.innerHTML = `<img class="modal-product-img-box" src="${p.image_url}" alt="${escapeHtml(p.name)}" />`;
+      } else {
+        imgBox.innerHTML = `<div class="modal-product-img-placeholder">📦</div>`;
+      }
+
+      const tagsContainer = document.getElementById('view-prod-tags');
+      const tagsArray = p.tags ? p.tags.split(',') : [];
+      tagsContainer.innerHTML = tagsArray.map(t => `<span class="tag-pill">${escapeHtml(t)}</span>`).join('');
+
+      await loadProductReviews(productId);
+      document.getElementById('view-modal').classList.add('active');
+    }
+
+    async function loadProductReviews(productId) {
+      const listContainer = document.getElementById('reviews-list-container');
+      try {
+        const response = await fetch(`${API_BASE}/products/${productId}/reviews`);
+        if (!response.ok) throw new Error('Reviews fetch error');
+        const data = await response.json();
+        const agg = data.aggregate;
+        const reviews = data.reviews;
+
+        document.getElementById('sentiment-avg-rating').textContent = `★ ${agg.average_rating.toFixed(1)} / 5.0 (${agg.total_reviews} reviews)`;
+        document.getElementById('sentiment-pos-headline').textContent = `${agg.positive_percentage}% Positive`;
+
+        document.getElementById('sentiment-bar-pos').style.width = `${agg.positive_percentage}%`;
+        document.getElementById('sentiment-bar-neu').style.width = `${agg.neutral_percentage}%`;
+        document.getElementById('sentiment-bar-neg').style.width = `${agg.negative_percentage}%`;
+
+        document.getElementById('sentiment-lbl-pos').textContent = `${agg.positive_percentage}%`;
+        document.getElementById('sentiment-lbl-neu').textContent = `${agg.neutral_percentage}%`;
+        document.getElementById('sentiment-lbl-neg').textContent = `${agg.negative_percentage}%`;
+
+        document.getElementById('top-pros-list').textContent = agg.top_pros.join(' • ');
+        document.getElementById('top-cons-list').textContent = agg.top_cons.join(' • ');
+
+        if (reviews.length === 0) {
+          listContainer.innerHTML = `<div style="font-size:12px; color:var(--text-subtle); padding:12px; text-align:center;">No customer reviews submitted yet. Use the form below to post a test review!</div>`;
+          return;
+        }
+
+        const starStr = (r) => '★'.repeat(r) + '☆'.repeat(5 - r);
+
+        listContainer.innerHTML = reviews.map(r => `
+          <div class="review-item-card">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-weight:700; color:#fff; font-size:13px;">${escapeHtml(r.customer_name)}</span>
+                <span style="color:#fbbf24; font-size:12px;">${starStr(r.rating)}</span>
+              </div>
+              <span class="sentiment-badge ${r.sentiment_label}">
+                ${r.sentiment_label === 'Positive' ? '😊 Positive' : r.sentiment_label === 'Negative' ? '😞 Negative' : '😐 Neutral'}
+              </span>
+            </div>
+            
+            <div style="font-size:12px; color:var(--text-main); line-height:1.4;">${escapeHtml(r.review_text)}</div>
+            
+            <div style="display:flex; gap:10px; font-size:11px; margin-top:2px;">
+              ${r.pros ? `<span style="color:#34d399;">👍 <b>Pros:</b> ${escapeHtml(r.pros)}</span>` : ''}
+              ${r.cons ? `<span style="color:#f87171;">👎 <b>Cons:</b> ${escapeHtml(r.cons)}</span>` : ''}
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        listContainer.innerHTML = `<div style="font-size:12px; color:var(--accent-rose); padding:10px;">Failed to load reviews & sentiment.</div>`;
+      }
+    }
+
+    async function handleAddTestReviewSubmit() {
+      if (!activeModalProductId) return;
+
+      const nameInput = document.getElementById('modal-review-name');
+      const textInput = document.getElementById('modal-review-text');
+      const ratingSelect = document.getElementById('modal-review-rating');
+
+      const customerName = nameInput.value.trim();
+      const reviewText = textInput.value.trim();
+      const rating = parseInt(ratingSelect.value);
+
+      if (!customerName || !reviewText) {
+        showToast('Please enter customer name and review text', 'error');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/products/${activeModalProductId}/reviews`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            customer_name: customerName,
+            review_text: reviewText,
+            rating: rating
+          })
+        });
+
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.detail || 'Review submission failed');
+
+        showToast(`Review posted! Analyzed as ${result.sentiment_label} (${result.sentiment_score >= 0 ? '+' : ''}${result.sentiment_score})`, 'success');
+        
+        nameInput.value = '';
+        textInput.value = '';
+
+        await loadProductReviews(activeModalProductId);
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
     async function handleRecordSale(productId, productName) {
       try {
         const response = await fetch(`${API_BASE}/products/${productId}/simulate-sale`, {
@@ -706,31 +1062,6 @@
       }
     }
 
-    function openViewProductModal(productId) {
-      const p = vendorProductsMap[productId];
-      if (!p) return;
-
-      document.getElementById('view-prod-name').textContent = p.name;
-      document.getElementById('view-prod-id').textContent = `Product ID: #${p.id}`;
-      document.getElementById('view-prod-category').textContent = p.category || 'VISION: Electronics';
-      document.getElementById('view-prod-price').textContent = `₹${p.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
-      document.getElementById('view-prod-stock').textContent = `Stock: ${p.stock_qty} units`;
-      document.getElementById('view-prod-desc').textContent = p.description || 'No description';
-
-      const imgBox = document.getElementById('view-prod-img-box');
-      if (p.image_url) {
-        imgBox.innerHTML = `<img class="modal-product-img-box" src="${p.image_url}" alt="${escapeHtml(p.name)}" />`;
-      } else {
-        imgBox.innerHTML = `<div class="modal-product-img-placeholder">📦</div>`;
-      }
-
-      const tagsContainer = document.getElementById('view-prod-tags');
-      const tagsArray = p.tags ? p.tags.split(',') : [];
-      tagsContainer.innerHTML = tagsArray.map(t => `<span class="tag-pill">${escapeHtml(t)}</span>`).join('');
-
-      document.getElementById('view-modal').classList.add('active');
-    }
-
     function openAIEmailModal(productId) {
       const p = vendorProductsMap[productId];
       if (!p) return;
@@ -757,6 +1088,8 @@
 
     function closeModal(modalId) {
       document.getElementById(modalId).classList.remove('active');
+      activeModalProductId = null;
+      activeRestockProductId = null;
     }
 
     function showToast(message, type = 'success') {
