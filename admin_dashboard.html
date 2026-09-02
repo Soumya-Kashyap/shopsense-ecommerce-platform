@@ -157,6 +157,14 @@
     }
     .btn-gradient:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 0 30px rgba(99, 102, 241, 0.45); }
 
+    .btn-csv-export {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; font-weight: 700; font-size: 13px;
+      padding: 10px 18px; border-radius: var(--radius-md); border: none; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+      transition: all var(--transition-normal);
+    }
+    .btn-csv-export:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 0 28px rgba(16, 185, 129, 0.5); }
+
     /* CONTENT AREA */
     .content-area { padding: 36px; display: flex; flex-direction: column; gap: 32px; max-width: 1400px; width: 100%; margin: 0 auto; }
     .view-section { display: none; animation: fadeInSlideUp 300ms ease forwards; }
@@ -196,12 +204,14 @@
 
     .stat-value { font-size: 36px; font-weight: 900; color: #ffffff; letter-spacing: -1px; }
 
-    /* PANELS */
+    /* PANELS & REPORTS GRID */
     .card-panel {
       background: var(--bg-card); backdrop-filter: blur(16px);
       border: 1px solid var(--border-color); border-radius: var(--radius-lg);
       padding: 26px; box-shadow: var(--shadow-card); display: flex; flex-direction: column; gap: 20px;
     }
+
+    .reports-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
 
     .panel-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 16px; }
     .panel-title { font-size: 17px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
@@ -258,6 +268,12 @@
     .segment-badge.med-val { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); }
     .segment-badge.low-val { background: rgba(148, 163, 184, 0.15); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.3); }
 
+    /* BENCHMARK PERFORMANCE BADGES */
+    .perf-badge { font-size: 11px; font-weight: 800; text-transform: uppercase; padding: 4px 12px; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px; }
+    .perf-badge.above { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+    .perf-badge.avg { background: rgba(148, 163, 184, 0.15); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.3); }
+    .perf-badge.below { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+
     .rank-badge { font-size: 13px; font-weight: 900; padding: 4px 10px; border-radius: var(--radius-sm); display: inline-flex; align-items: center; }
     .rank-badge.rank-1 { background: rgba(245, 158, 11, 0.25); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.5); }
     .rank-badge.rank-2 { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.4); }
@@ -285,10 +301,15 @@
     .btn-action-approve { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: var(--radius-sm); cursor: pointer; }
     .btn-action-reject { background: rgba(244, 63, 94, 0.15); color: #f87171; border: 1px solid rgba(244, 63, 94, 0.3); font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: var(--radius-sm); cursor: pointer; }
 
-    /* TOAST */
+    /* TOAST & WEBSOCKET POPUPS */
     .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 200; display: flex; flex-direction: column; gap: 10px; }
-    .toast { background: var(--bg-card); border: 1px solid var(--border-color); padding: 14px 20px; border-radius: var(--radius-md); box-shadow: 0 10px 30px rgba(0,0,0,0.5); color: var(--text-main); font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; animation: slideIn 300ms ease forwards; }
-    .toast.success { border-color: rgba(16, 185, 129, 0.4); }
+    .toast {
+      background: var(--bg-card); backdrop-filter: blur(20px); border: 1px solid var(--border-color);
+      padding: 14px 20px; border-radius: var(--radius-md); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      color: var(--text-main); font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 10px;
+      animation: slideIn 300ms ease forwards;
+    }
+    .toast.success { border-color: rgba(16, 185, 129, 0.4); box-shadow: 0 0 20px rgba(16, 185, 129, 0.2); }
     .toast.error { border-color: rgba(244, 63, 94, 0.4); }
     @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
   </style>
@@ -341,6 +362,12 @@
           Product Insights
         </button>
       </li>
+      <li>
+        <button class="nav-item-btn" onclick="switchTab('reports', this)">
+          <svg viewBox="0 0 24 24"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+          Reports & Charts
+        </button>
+      </li>
     </ul>
 
     <div class="sidebar-footer">
@@ -360,7 +387,13 @@
     <header class="header-bar">
       <h1 class="header-title" id="current-view-title">Admin Control Dashboard</h1>
 
-      <div class="header-actions">
+      <div class="header-actions" style="display:flex; align-items:center; gap:16px;">
+        <!-- WEBSOCKET LIVE INDICATOR BADGE -->
+        <div style="display:flex; align-items:center; gap:8px; background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.3); padding:6px 12px; border-radius:var(--radius-md);" id="ws-status-badge">
+          <span style="width:8px; height:8px; border-radius:50%; background:#34d399; box-shadow:0 0 8px #34d399; display:inline-block;" id="ws-dot"></span>
+          <span style="font-size:12px; font-weight:700; color:#34d399;" id="ws-status-text">WS Live</span>
+        </div>
+
         <button class="btn-gradient" onclick="handleRefreshDashboard()">
           🔄 Refresh Data
         </button>
@@ -412,7 +445,7 @@
 
         </div>
 
-        <!-- REQUIREMENT 2: 7-DAY SALES TREND CHART PANEL -->
+        <!-- 7-DAY SALES TREND CHART PANEL -->
         <div class="card-panel">
           <div class="panel-header">
             <h2 class="panel-title">
@@ -562,9 +595,8 @@
         </div>
       </section>
 
-      <!-- VIEW 3: STREAMLINED ANALYTICS ENGINE (INVENTORY OVERVIEW ONLY) -->
+      <!-- VIEW 3: STREAMLINED ANALYTICS ENGINE -->
       <section id="view-analytics" class="view-section">
-        <!-- Inventory Analytics Stat Cards -->
         <div class="stats-grid">
           
           <div class="stat-card highlighted-rose">
@@ -587,7 +619,6 @@
 
         </div>
 
-        <!-- Inventory Overview Table Panel -->
         <div class="card-panel">
           <div class="panel-header">
             <h2 class="panel-title">
@@ -720,6 +751,149 @@
 
       </section>
 
+      <!-- VIEW 6: EXECUTIVE REPORTS & CHARTS VIEW WITH LEADERBOARD & EXPORTS -->
+      <section id="view-reports" class="view-section">
+        
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">
+              <svg style="width:22px;height:22px;stroke:var(--accent-indigo);fill:none;stroke-width:2" viewBox="0 0 24 24"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+              Executive Reports, Charts & Real-Time Intelligence
+            </h2>
+            <span style="font-size:12px; color:var(--text-muted);">Chart-ready endpoints, benchmarks & downloadable reports</span>
+          </div>
+
+          <div style="display:flex; gap:10px; align-items:center;">
+            <button class="btn-csv-export" onclick="handleExportVendorsCSV()">
+              📥 Export Vendor Report (CSV)
+            </button>
+            <button class="btn-csv-export" style="background:linear-gradient(135deg, #ef4444 0%, #dc2626 100%); box-shadow:0 0 20px rgba(239,68,68,0.3);" onclick="handleExportVendorsPDF()">
+              📄 Export PDF Report
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 CHARTS GRID -->
+        <div class="reports-grid">
+          
+          <!-- CHART 1: REVENUE BY VENDOR -->
+          <div class="card-panel">
+            <div class="panel-header">
+              <h3 class="panel-title">📊 Revenue by Vendor</h3>
+              <span style="font-size:11px; color:var(--text-muted);">Ranked total GMV</span>
+            </div>
+            <div id="chart-vendor-revenue-box" style="width:100%; min-height:220px; display:flex; align-items:center; justify-content:center;">
+              <!-- SVG Bar Chart -->
+            </div>
+          </div>
+
+          <!-- CHART 2: DAILY ORDERS TREND -->
+          <div class="card-panel">
+            <div class="panel-header">
+              <h3 class="panel-title">📈 Daily Orders Trend (Last 7 Days)</h3>
+              <span style="font-size:11px; color:var(--text-muted);">Order volume per day</span>
+            </div>
+            <div id="chart-daily-orders-box" style="width:100%; min-height:220px; display:flex; align-items:center; justify-content:center;">
+              <!-- SVG Bar/Line Chart -->
+            </div>
+          </div>
+
+          <!-- CHART 3: CUSTOMER SEGMENT DISTRIBUTION -->
+          <div class="card-panel">
+            <div class="panel-header">
+              <h3 class="panel-title">🍩 Customer Segment Distribution</h3>
+              <span style="font-size:11px; color:var(--text-muted);">High / Medium / Low Value share</span>
+            </div>
+            <div id="chart-segment-dist-box" style="width:100%; min-height:220px; display:flex; align-items:center; justify-content:center;">
+              <!-- SVG Donut Chart -->
+            </div>
+          </div>
+
+          <!-- CHART 4: CATEGORY SALES BREAKDOWN -->
+          <div class="card-panel">
+            <div class="panel-header">
+              <h3 class="panel-title">🏷️ Category Sales Breakdown</h3>
+              <span style="font-size:11px; color:var(--text-muted);">Revenue by product category</span>
+            </div>
+            <div id="chart-category-sales-box" style="width:100%; min-height:220px; display:flex; align-items:center; justify-content:center;">
+              <!-- SVG Bar Chart -->
+            </div>
+          </div>
+
+        </div>
+
+        <!-- VENDOR LEADERBOARD SECTION -->
+        <div class="card-panel" style="margin-top:16px;">
+          <div class="panel-header">
+            <h3 class="panel-title">
+              🏆 Vendor Leaderboard
+            </h3>
+            <span style="font-size:12px; color:var(--text-muted);">Top merchant revenue rankings & performance podium</span>
+          </div>
+
+          <!-- PODIUM LAYOUT FOR TOP 3 -->
+          <div style="display:grid; grid-template-columns: 1fr 1.15fr 1fr; gap:16px; align-items:flex-end; padding:16px 0;" id="leaderboard-podium-container">
+            <!-- Dynamically populated via JS -->
+          </div>
+
+          <!-- FULL RANKED VENDOR TABLE BELOW PODIUM -->
+          <div class="table-responsive" style="margin-top:12px;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Vendor Identity</th>
+                  <th>Total Revenue (₹ INR)</th>
+                  <th>Total Orders</th>
+                  <th>Units Sold</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboard-table-body">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- VENDOR BENCHMARKING SECTION BELOW 4 CHARTS -->
+        <div class="card-panel" style="margin-top:8px;">
+          <div class="panel-header">
+            <h3 class="panel-title">
+              <svg style="width:20px;height:20px;stroke:var(--accent-amber);fill:none;stroke-width:2" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+              Vendor Benchmarking & Marketplace Comparison
+            </h3>
+            <span style="font-size:12px; color:var(--text-muted);">Performance vs Platform Averages</span>
+          </div>
+
+          <!-- Top Summary Line Banner -->
+          <div style="background:rgba(17,24,39,0.8); border:1px solid var(--border-color-glow); padding:14px 18px; border-radius:var(--radius-md); display:flex; flex-wrap:wrap; gap:24px; font-size:13px; font-weight:700; color:#fff;" id="marketplace-avg-banner">
+            <div>Marketplace Avg Revenue: <span style="color:#34d399;" id="bm-avg-rev">₹0.00</span></div>
+            <div>Avg Order Value (AOV): <span style="color:#60a5fa;" id="bm-avg-aov">₹0.00</span></div>
+            <div>Avg Units / Vendor: <span style="color:#facc15;" id="bm-avg-units">0</span></div>
+          </div>
+
+          <!-- Benchmarking Table -->
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Vendor Identity</th>
+                  <th>Total Revenue (₹ INR)</th>
+                  <th>Average Order Value (AOV)</th>
+                  <th>Units Sold</th>
+                  <th>Performance Matrix</th>
+                </tr>
+              </thead>
+              <tbody id="benchmarking-table-body">
+                <!-- Dynamically populated via GET /analytics/benchmarks -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
     </div>
   </main>
 
@@ -729,6 +903,7 @@
   <script>
     const API_BASE = window.location.origin.includes('http') ? window.location.origin : 'http://127.0.0.1:8000';
     let rawVendorsList = [];
+    let wsClient = null;
 
     document.addEventListener('DOMContentLoaded', () => {
       const token = sessionStorage.getItem('access_token');
@@ -743,11 +918,75 @@
       document.getElementById('admin-email').textContent = sessionStorage.getItem('email') || 'admin@shopsense.com';
 
       handleRefreshDashboard();
+      initWebSocket();
     });
 
     function handleLogout() {
+      if (wsClient) wsClient.close();
       sessionStorage.clear();
       window.location.href = 'login.html';
+    }
+
+    // REQUIREMENT 3: WEBSOCKET REAL-TIME NOTIFICATION HANDLER WITH RECONNECT LOGIC
+    function initWebSocket() {
+      const host = window.location.host || '127.0.0.1:8000';
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${host}/ws/notifications`;
+
+      try {
+        wsClient = new WebSocket(wsUrl);
+
+        wsClient.onopen = () => {
+          console.log('✅ Connected to ShopSense WebSocket notification channel');
+          document.getElementById('ws-dot').style.background = '#34d399';
+          document.getElementById('ws-dot').style.boxShadow = '0 0 8px #34d399';
+          document.getElementById('ws-status-text').textContent = 'WS Live';
+        };
+
+        wsClient.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.event === 'new_sale') {
+              const amountFormatted = `₹${data.sale_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+              const toastMsg = `🔔 New Sale: ${data.vendor_name} sold '${data.product_name}' for ${amountFormatted}`;
+              showToast(toastMsg, 'success');
+
+              // Automatically refresh dashboard stat cards & live feed on real-time notification
+              fetchDashboardStats();
+              fetchLiveActivityFeed();
+              fetchPerVendorRevenueSummary();
+              fetchSalesTrend();
+            }
+          } catch (err) {
+            console.error('Error handling WebSocket message payload:', err);
+          }
+        };
+
+        wsClient.onclose = () => {
+          console.warn('⚠️ WebSocket disconnected. Reconnecting in 3 seconds...');
+          document.getElementById('ws-dot').style.background = '#f59e0b';
+          document.getElementById('ws-dot').style.boxShadow = 'none';
+          document.getElementById('ws-status-text').textContent = 'Reconnecting...';
+          setTimeout(initWebSocket, 3000);
+        };
+
+        wsClient.onerror = (err) => {
+          console.error('WebSocket connection error:', err);
+          if (wsClient) wsClient.close();
+        };
+      } catch (err) {
+        console.error('Failed to instantiate WebSocket:', err);
+      }
+    }
+
+    function handleExportVendorsCSV() {
+      window.location.href = `${API_BASE}/reports/export/vendors-csv`;
+      showToast('Downloading Vendor Report CSV file...', 'success');
+    }
+
+    function handleExportVendorsPDF() {
+      window.location.href = `${API_BASE}/reports/export/vendors-pdf`;
+      showToast('Downloading Vendor PDF Performance Report...', 'success');
     }
 
     async function handleRefreshDashboard() {
@@ -759,9 +998,10 @@
         fetchSalesTrend(),
         fetchInventoryAnalytics(),
         fetchTopSellingProducts(),
-        fetchCustomerSegments()
+        fetchCustomerSegments(),
+        fetchReportsChartsData()
       ]);
-      showToast('Dashboard, trends, inventory & customer insights refreshed!', 'success');
+      showToast('Dashboard, trends, benchmarks & reports refreshed!', 'success');
     }
 
     function switchTab(viewName, btnElement) {
@@ -777,9 +1017,14 @@
         'vendors': 'Marketplace Vendors Directory & Controls',
         'analytics': 'Analytics Engine & Platform Inventory Intelligence',
         'customers': 'Customer Insights & Value Analytics',
-        'products-insights': 'Product Insights & Top Sellers'
+        'products-insights': 'Product Insights & Top Sellers',
+        'reports': 'Executive Reports, Charts & Real-Time Intelligence'
       };
       document.getElementById('current-view-title').textContent = titleMap[viewName] || 'Admin Dashboard';
+
+      if (viewName === 'reports') {
+        fetchReportsChartsData();
+      }
     }
 
     async function fetchDashboardStats() {
@@ -801,7 +1046,6 @@
       }
     }
 
-    // REQUIREMENT 2: FETCH AND RENDER 7-DAY SALES TREND SVG CHART
     async function fetchSalesTrend() {
       const container = document.getElementById('sales-trend-chart-container');
       try {
@@ -826,10 +1070,6 @@
               <linearGradient id="salesBarGrad" x1="0%" y1="0%" x2="0%" y2="100%">
                 <stop offset="0%" stop-color="#6366f1" stop-opacity="0.9" />
                 <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.4" />
-              </linearGradient>
-              <linearGradient id="salesBarGradHover" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stop-color="#ec4899" stop-opacity="0.95" />
-                <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.7" />
               </linearGradient>
             </defs>
         `;
@@ -856,6 +1096,377 @@
         container.innerHTML = svgHtml;
       } catch (err) {
         container.innerHTML = `<div style="font-size:13px; color:var(--accent-rose);">Failed to load sales trend chart.</div>`;
+      }
+    }
+
+    async function fetchReportsChartsData() {
+      await Promise.all([
+        renderRevenueByVendorChart(),
+        renderDailyOrdersTrendChart(),
+        renderCustomerSegmentDonutChart(),
+        renderCategorySalesBreakdownChart(),
+        fetchVendorBenchmarks(),
+        fetchVendorLeaderboard()
+      ]);
+    }
+
+    async function fetchVendorLeaderboard() {
+      const podiumContainer = document.getElementById('leaderboard-podium-container');
+      const tbody = document.getElementById('leaderboard-table-body');
+      try {
+        const res = await fetch(`${API_BASE}/vendors/revenue-summary`);
+        if (!res.ok) throw new Error('Failed to fetch vendor summary');
+        const vendors = await res.json();
+
+        // Sort vendors by total_revenue descending
+        vendors.sort((a, b) => b.total_revenue - a.total_revenue);
+
+        if (vendors.length === 0) {
+          podiumContainer.innerHTML = `<div style="grid-column:span 3; text-align:center; padding:20px; color:var(--text-subtle);">No vendor sales data available.</div>`;
+          tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--text-subtle);">No vendor records found.</td></tr>`;
+          return;
+        }
+
+        const p1 = vendors[0];
+        const p2 = vendors[1];
+        const p3 = vendors[2];
+
+        let podiumHtml = '';
+
+        // 2nd Place (Silver) - Left
+        if (p2) {
+          podiumHtml += `
+            <div style="background:rgba(203,213,225,0.08); border:1px solid rgba(203,213,225,0.3); border-radius:var(--radius-lg); padding:20px 16px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:8px;">
+              <div style="font-size:36px;">🥈</div>
+              <div style="font-size:12px; font-weight:800; color:#cbd5e1; text-transform:uppercase;">2nd Place</div>
+              <div style="font-size:16px; font-weight:800; color:#fff;">${escapeHtml(p2.vendor_name)}</div>
+              <div style="font-size:18px; font-weight:900; color:#cbd5e1;">₹${p2.total_revenue.toLocaleString('en-IN', {minimumFractionDigits:2})}</div>
+              <div style="font-size:11px; color:var(--text-subtle);">${p2.total_orders} orders • ${p2.total_units_sold} units</div>
+            </div>
+          `;
+        } else {
+          podiumHtml += `<div></div>`;
+        }
+
+        // 1st Place (Gold) - Center (Larger/Higher)
+        if (p1) {
+          podiumHtml += `
+            <div style="background:rgba(245,158,11,0.15); border:2px solid rgba(245,158,11,0.6); border-radius:var(--radius-lg); padding:26px 16px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:8px; box-shadow:0 0 30px rgba(245,158,11,0.3); transform:translateY(-8px);">
+              <div style="font-size:46px;">🥇</div>
+              <div style="font-size:13px; font-weight:900; color:#fbbf24; text-transform:uppercase; letter-spacing:1px;">🏆 1st Place</div>
+              <div style="font-size:18px; font-weight:900; color:#fff;">${escapeHtml(p1.vendor_name)}</div>
+              <div style="font-size:22px; font-weight:900; color:#fbbf24;">₹${p1.total_revenue.toLocaleString('en-IN', {minimumFractionDigits:2})}</div>
+              <div style="font-size:12px; color:var(--text-main); font-weight:600;">${p1.total_orders} orders • ${p1.total_units_sold} units</div>
+            </div>
+          `;
+        }
+
+        // 3rd Place (Bronze) - Right
+        if (p3) {
+          podiumHtml += `
+            <div style="background:rgba(217,119,6,0.1); border:1px solid rgba(217,119,6,0.35); border-radius:var(--radius-lg); padding:20px 16px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:8px;">
+              <div style="font-size:36px;">🥉</div>
+              <div style="font-size:12px; font-weight:800; color:#f59e0b; text-transform:uppercase;">3rd Place</div>
+              <div style="font-size:16px; font-weight:800; color:#fff;">${escapeHtml(p3.vendor_name)}</div>
+              <div style="font-size:18px; font-weight:900; color:#f59e0b;">₹${p3.total_revenue.toLocaleString('en-IN', {minimumFractionDigits:2})}</div>
+              <div style="font-size:11px; color:var(--text-subtle);">${p3.total_orders} orders • ${p3.total_units_sold} units</div>
+            </div>
+          `;
+        } else {
+          podiumHtml += `<div></div>`;
+        }
+
+        podiumContainer.innerHTML = podiumHtml;
+
+        // Full Ranked Vendor Table
+        tbody.innerHTML = vendors.map((v, idx) => {
+          let rankBadge = `<span class="rank-badge rank-other">#${idx + 1}</span>`;
+          if (idx === 0) rankBadge = `<span class="rank-badge rank-1">🥇 #1</span>`;
+          else if (idx === 1) rankBadge = `<span class="rank-badge rank-2">🥈 #2</span>`;
+          else if (idx === 2) rankBadge = `<span class="rank-badge rank-3">🥉 #3</span>`;
+
+          return `
+            <tr>
+              <td>${rankBadge}</td>
+              <td>
+                <div style="font-weight:700; color:#fff;">${escapeHtml(v.vendor_name)}</div>
+                <div style="font-size:11px; color:var(--text-subtle);">${escapeHtml(v.email)}</div>
+              </td>
+              <td>
+                <span style="font-weight:900; color:#34d399;">₹${v.total_revenue.toLocaleString('en-IN', {minimumFractionDigits:2})}</span>
+              </td>
+              <td><span style="font-weight:700; color:#fff;">${v.total_orders} orders</span></td>
+              <td><span style="font-weight:700; color:#fff;">${v.total_units_sold} units</span></td>
+              <td>
+                <span class="status-badge ${v.status}">${v.status === 'suspended' ? 'REJECTED' : v.status.toUpperCase()}</span>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+      } catch (err) {
+        podiumContainer.innerHTML = `<div style="grid-column:span 3; color:var(--accent-rose); padding:16px;">Failed to load vendor leaderboard.</div>`;
+      }
+    }
+
+    async function fetchVendorBenchmarks() {
+      const tbody = document.getElementById('benchmarking-table-body');
+      try {
+        const response = await fetch(`${API_BASE}/analytics/benchmarks`);
+        if (!response.ok) throw new Error('Benchmarks fetch error');
+        const data = await response.json();
+        const avg = data.marketplace_averages;
+        const vendors = data.vendors;
+
+        document.getElementById('bm-avg-rev').textContent = `₹${avg.avg_revenue_per_vendor.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+        document.getElementById('bm-avg-aov').textContent = `₹${avg.avg_order_value.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+        document.getElementById('bm-avg-units').textContent = `${avg.avg_units_per_vendor} units`;
+
+        if (vendors.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:24px; color:var(--text-subtle);">No vendor benchmark data available.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = vendors.map(v => {
+          let perfClass = 'avg';
+          let perfSymbol = '●';
+          if (v.performance === 'Above Average') { perfClass = 'above'; perfSymbol = '▲'; }
+          else if (v.performance === 'Below Average') { perfClass = 'below'; perfSymbol = '▼'; }
+
+          return `
+            <tr>
+              <td>
+                <div style="font-weight:700; color:#fff;">${escapeHtml(v.vendor_name)}</div>
+                <div style="font-size:11px; color:var(--text-subtle);">${escapeHtml(v.email)}</div>
+              </td>
+              <td>
+                <span style="font-weight:800; color:#34d399;">₹${v.revenue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+              </td>
+              <td>
+                <span style="font-weight:700; color:#60a5fa;">₹${v.aov.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+              </td>
+              <td>
+                <span style="font-weight:700; color:#fff;">${v.units_sold} units</span>
+              </td>
+              <td>
+                <span class="perf-badge ${perfClass}">
+                  ${perfSymbol} ${v.performance}
+                </span>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--accent-rose); padding:20px;">Failed to load vendor benchmarks.</td></tr>`;
+      }
+    }
+
+    async function renderRevenueByVendorChart() {
+      const box = document.getElementById('chart-vendor-revenue-box');
+      try {
+        const res = await fetch(`${API_BASE}/charts/revenue-by-vendor`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+
+        if (data.length === 0) {
+          box.innerHTML = `<div style="font-size:12px; color:var(--text-subtle);">No vendor revenue data available.</div>`;
+          return;
+        }
+
+        const maxVal = Math.max(...data.map(d => d.value), 10000);
+        const width = 450;
+        const height = 220;
+        const barWidth = Math.min(52, (width - 40) / data.length - 12);
+
+        let svg = `<svg viewBox="0 0 ${width} ${height}" style="width:100%; height:auto; overflow:visible;">
+          <defs>
+            <linearGradient id="vBarGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.9" />
+              <stop offset="100%" stop-color="#6366f1" stop-opacity="0.4" />
+            </linearGradient>
+          </defs>`;
+
+        const gap = (width - (data.length * barWidth)) / (data.length + 1);
+
+        data.forEach((d, i) => {
+          const h = Math.max((d.value / maxVal) * 140, 8);
+          const x = gap + i * (barWidth + gap);
+          const y = 160 - h;
+          const labelShort = d.label.length > 8 ? d.label.slice(0, 7) + '…' : d.label;
+
+          svg += `
+            <g style="cursor:pointer;">
+              <rect x="${x}" y="${y}" width="${barWidth}" height="${h}" rx="5" fill="url(#vBarGrad)" stroke="rgba(59,130,246,0.5)" stroke-width="1">
+                <title>${d.label}: ₹${d.value.toLocaleString('en-IN')}</title>
+              </rect>
+              <text x="${x + barWidth/2}" y="${y - 6}" text-anchor="middle" fill="#34d399" font-size="10" font-weight="700">₹${Math.round(d.value/1000)}k</text>
+              <text x="${x + barWidth/2}" y="180" text-anchor="middle" fill="#94a3b8" font-size="11" font-weight="600">${labelShort}</text>
+            </g>
+          `;
+        });
+        svg += `</svg>`;
+        box.innerHTML = svg;
+      } catch (err) {
+        box.innerHTML = `<div style="font-size:12px; color:var(--accent-rose);">Failed to load revenue by vendor.</div>`;
+      }
+    }
+
+    async function renderDailyOrdersTrendChart() {
+      const box = document.getElementById('chart-daily-orders-box');
+      try {
+        const res = await fetch(`${API_BASE}/charts/daily-orders-trend`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+
+        if (data.length === 0) {
+          box.innerHTML = `<div style="font-size:12px; color:var(--text-subtle);">No order trend data.</div>`;
+          return;
+        }
+
+        const maxVal = Math.max(...data.map(d => d.value), 5);
+        const width = 450;
+        const height = 220;
+        const barWidth = 36;
+        const gap = (width - (data.length * barWidth)) / (data.length + 1);
+
+        let svg = `<svg viewBox="0 0 ${width} ${height}" style="width:100%; height:auto; overflow:visible;">
+          <defs>
+            <linearGradient id="oBarGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#10b981" stop-opacity="0.9" />
+              <stop offset="100%" stop-color="#059669" stop-opacity="0.4" />
+            </linearGradient>
+          </defs>`;
+
+        data.forEach((d, i) => {
+          const h = Math.max((d.value / maxVal) * 140, 6);
+          const x = gap + i * (barWidth + gap);
+          const y = 160 - h;
+
+          svg += `
+            <g style="cursor:pointer;">
+              <rect x="${x}" y="${y}" width="${barWidth}" height="${h}" rx="5" fill="url(#oBarGrad)" stroke="rgba(16,185,129,0.5)" stroke-width="1">
+                <title>${d.label}: ${d.value} orders</title>
+              </rect>
+              <text x="${x + barWidth/2}" y="${y - 6}" text-anchor="middle" fill="#fff" font-size="11" font-weight="800">${d.value}</text>
+              <text x="${x + barWidth/2}" y="180" text-anchor="middle" fill="#94a3b8" font-size="10" font-weight="600">${d.label.slice(0,3)}</text>
+            </g>
+          `;
+        });
+        svg += `</svg>`;
+        box.innerHTML = svg;
+      } catch (err) {
+        box.innerHTML = `<div style="font-size:12px; color:var(--accent-rose);">Failed to load daily orders trend.</div>`;
+      }
+    }
+
+    async function renderCustomerSegmentDonutChart() {
+      const box = document.getElementById('chart-segment-dist-box');
+      try {
+        const res = await fetch(`${API_BASE}/charts/customer-segment-distribution`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+
+        const totalCust = data.reduce((acc, d) => acc + d.value, 0);
+
+        if (totalCust === 0) {
+          box.innerHTML = `<div style="font-size:12px; color:var(--text-subtle);">No customers recorded.</div>`;
+          return;
+        }
+
+        const cx = 110, cy = 110, r = 70, strokeWidth = 24;
+        const circumference = 2 * Math.PI * r;
+        let cumulativeOffset = 0;
+
+        let svg = `<div style="display:flex; align-items:center; gap:24px; justify-content:center; width:100%;">
+          <svg viewBox="0 0 220 220" style="width:160px; height:160px; transform:rotate(-90deg);">
+        `;
+
+        data.forEach(d => {
+          const pct = d.value / totalCust;
+          const dashArray = `${pct * circumference} ${circumference}`;
+          const dashOffset = -cumulativeOffset;
+          cumulativeOffset += pct * circumference;
+
+          svg += `
+            <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${d.color}" stroke-width="${strokeWidth}"
+              stroke-dasharray="${dashArray}" stroke-dashoffset="${dashOffset}" style="transition:all 500ms ease;">
+              <title>${d.label}: ${d.value} customer(s) (${Math.round(pct*100)}%)</title>
+            </circle>
+          `;
+        });
+
+        svg += `
+            <text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="20" font-weight="900" style="transform:rotate(90deg); transform-origin:center;">${totalCust}</text>
+          </svg>
+
+          <div style="display:flex; flex-direction:column; gap:8px;">
+        `;
+
+        data.forEach(d => {
+          const pct = Math.round((d.value / totalCust) * 100);
+          svg += `
+            <div style="display:flex; align-items:center; gap:8px; font-size:12px; font-weight:600;">
+              <span style="width:12px; height:12px; border-radius:50%; background:${d.color}; display:inline-block;"></span>
+              <span style="color:#fff;">${d.label}:</span>
+              <span style="color:var(--text-muted);">${d.value} (${pct}%)</span>
+            </div>
+          `;
+        });
+
+        svg += `</div></div>`;
+        box.innerHTML = svg;
+      } catch (err) {
+        box.innerHTML = `<div style="font-size:12px; color:var(--accent-rose);">Failed to load segment distribution.</div>`;
+      }
+    }
+
+    async function renderCategorySalesBreakdownChart() {
+      const box = document.getElementById('chart-category-sales-box');
+      try {
+        const res = await fetch(`${API_BASE}/charts/category-sales-breakdown`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+
+        if (data.length === 0) {
+          box.innerHTML = `<div style="font-size:12px; color:var(--text-subtle);">No category sales data.</div>`;
+          return;
+        }
+
+        const maxVal = Math.max(...data.map(d => d.value), 10000);
+        const width = 450;
+        const height = 220;
+        const barWidth = Math.min(60, (width - 40) / data.length - 12);
+
+        let svg = `<svg viewBox="0 0 ${width} ${height}" style="width:100%; height:auto; overflow:visible;">
+          <defs>
+            <linearGradient id="catBarGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#ec4899" stop-opacity="0.9" />
+              <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.4" />
+            </linearGradient>
+          </defs>`;
+
+        const gap = (width - (data.length * barWidth)) / (data.length + 1);
+
+        data.forEach((d, i) => {
+          const h = Math.max((d.value / maxVal) * 140, 8);
+          const x = gap + i * (barWidth + gap);
+          const y = 160 - h;
+          const labelShort = d.label.length > 9 ? d.label.slice(0, 8) + '…' : d.label;
+
+          svg += `
+            <g style="cursor:pointer;">
+              <rect x="${x}" y="${y}" width="${barWidth}" height="${h}" rx="5" fill="url(#catBarGrad)" stroke="rgba(236,72,153,0.5)" stroke-width="1">
+                <title>${d.label}: ₹${d.value.toLocaleString('en-IN')}</title>
+              </rect>
+              <text x="${x + barWidth/2}" y="${y - 6}" text-anchor="middle" fill="#f472b6" font-size="10" font-weight="700">₹${Math.round(d.value/1000)}k</text>
+              <text x="${x + barWidth/2}" y="180" text-anchor="middle" fill="#94a3b8" font-size="10" font-weight="600">${labelShort}</text>
+            </g>
+          `;
+        });
+        svg += `</svg>`;
+        box.innerHTML = svg;
+      } catch (err) {
+        box.innerHTML = `<div style="font-size:12px; color:var(--accent-rose);">Failed to load category sales breakdown.</div>`;
       }
     }
 

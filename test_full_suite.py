@@ -6,7 +6,7 @@ client = TestClient(app)
 
 def run_full_suite_verification():
     print("==========================================================================")
-    print("🧪 SHOP SENSE MILESTONE 2: FULL SUITE (ANALYTICS, SENTIMENT, RESTOCK & TRENDS)")
+    print("🧪 SHOP SENSE MILESTONE 3: FULL SUITE (ANALYTICS, SENTIMENT, WEBSOCKETS, RAG, TEXT-TO-SQL & PDF)")
     print("==========================================================================\n")
 
     results_summary = []
@@ -18,7 +18,8 @@ def run_full_suite_verification():
         assert client.get("/login-page").status_code == 200
         assert client.get("/admin-dashboard").status_code == 200
         assert client.get("/vendor-dashboard").status_code == 200
-        print("  ✓ Web Page routes (/login-page, /admin-dashboard, /vendor-dashboard) accessible.")
+        assert client.get("/shopping-assistant").status_code == 200
+        print("  ✓ Web Page routes (/login-page, /admin-dashboard, /vendor-dashboard, /shopping-assistant) accessible.")
     except Exception as e:
         print(f"  ❌ Web Page routes check failed: {e}")
         raise
@@ -159,7 +160,6 @@ def run_full_suite_verification():
         expected_new_stock = initial_stock + add_qty
         assert restock_data["new_stock_qty"] == expected_new_stock, f"Expected {expected_new_stock}, got {restock_data['new_stock_qty']}"
 
-        # Verify low-stock list is updated (should now be 0 since stock >= 10)
         new_low_res = client.get("/inventory/low-stock")
         assert new_low_res.status_code == 200
         new_low_items = new_low_res.json()
@@ -197,10 +197,143 @@ def run_full_suite_verification():
         raise
 
     # --------------------------------------------------------------------------
-    # 8. SUMMARY REPORT
+    # 8. VALIDATION CHECK 7: MILESTONE 3 CHART ENDPOINTS (/charts/*)
+    # --------------------------------------------------------------------------
+    print("\n--- [CHECK 7] Milestone 3 Chart Endpoints (/charts/*) Validation ---")
+    try:
+        assert client.get("/charts/revenue-by-vendor").status_code == 200
+        assert client.get("/charts/daily-orders-trend").status_code == 200
+        assert client.get("/charts/customer-segment-distribution").status_code == 200
+        assert client.get("/charts/category-sales-breakdown").status_code == 200
+
+        print(f"  ✓ All 4 /charts/* endpoints verified.")
+        results_summary.append(("CHECK 7: /charts/* Endpoints", "PASS"))
+    except Exception as e:
+        print(f"  ❌ CHECK 7 FAILED: {e}")
+        results_summary.append(("CHECK 7: /charts/* Endpoints", "FAIL"))
+        raise
+
+    # --------------------------------------------------------------------------
+    # 9. VALIDATION CHECK 8: MILESTONE 3 BENCHMARKING ENDPOINT
+    # --------------------------------------------------------------------------
+    print("\n--- [CHECK 8] GET /analytics/benchmarks Validation ---")
+    try:
+        bm_res = client.get("/analytics/benchmarks")
+        assert bm_res.status_code == 200
+        bm_data = bm_res.json()
+        assert "marketplace_averages" in bm_data and "vendors" in bm_data
+        print(f"  ✓ GET /analytics/benchmarks verified.")
+        results_summary.append(("CHECK 8: GET /analytics/benchmarks", "PASS"))
+    except Exception as e:
+        print(f"  ❌ CHECK 8 FAILED: {e}")
+        results_summary.append(("CHECK 8: GET /analytics/benchmarks", "FAIL"))
+        raise
+
+    # --------------------------------------------------------------------------
+    # 10. VALIDATION CHECK 9: MILESTONE 3 CSV EXPORTS
+    # --------------------------------------------------------------------------
+    print("\n--- [CHECK 9] CSV Reports & Sales Exports Validation ---")
+    try:
+        r1 = client.get("/reports/export/vendors-csv")
+        assert r1.status_code == 200
+        r2 = client.get("/products/1/export/sales-csv")
+        assert r2.status_code == 200
+        print(f"  ✓ CSV Export endpoints (/reports/export/vendors-csv & /products/1/export/sales-csv) verified.")
+        results_summary.append(("CHECK 9: CSV Export Endpoints", "PASS"))
+    except Exception as e:
+        print(f"  ❌ CHECK 9 FAILED: {e}")
+        results_summary.append(("CHECK 9: CSV Export Endpoints", "FAIL"))
+        raise
+
+    # --------------------------------------------------------------------------
+    # 11. VALIDATION CHECK 10: MILESTONE 3 WEBSOCKET NOTIFICATIONS
+    # --------------------------------------------------------------------------
+    print("\n--- [CHECK 10] WebSocket Real-Time Notifications (/ws/notifications) Validation ---")
+    try:
+        with client.websocket_connect("/ws/notifications") as websocket:
+            sale_res = client.post("/products/1/simulate-sale")
+            assert sale_res.status_code == 200
+            msg_payload = websocket.receive_json()
+            assert msg_payload["event"] == "new_sale"
+            print(f"  ✓ WebSocket broadcast received: {msg_payload['vendor_name']} sold '{msg_payload['product_name']}'.")
+        results_summary.append(("CHECK 10: WS Real-Time Notifications", "PASS"))
+    except Exception as e:
+        print(f"  ❌ CHECK 10 FAILED: {e}")
+        results_summary.append(("CHECK 10: WS Real-Time Notifications", "FAIL"))
+        raise
+
+    # --------------------------------------------------------------------------
+    # 12. VALIDATION CHECK 11: MILESTONE 3 RAG AI SHOPPING ASSISTANT
+    # --------------------------------------------------------------------------
+    print("\n--- [CHECK 11] RAG AI Shopping Assistant (POST /assistant/ask) Validation ---")
+    try:
+        ask_payload = {"question": "What are the best wireless earbuds under 15000?"}
+        ask_res = client.post("/assistant/ask", json=ask_payload)
+        assert ask_res.status_code == 200, f"Expected 200, got {ask_res.status_code}"
+        res_data = ask_res.json()
+
+        assert "answer" in res_data and "matched_products" in res_data and "fallback_used" in res_data
+        assert isinstance(res_data["answer"], str) and len(res_data["answer"]) > 10
+        assert len(res_data["matched_products"]) > 0
+
+        first_p = res_data["matched_products"][0]
+        assert first_p["price"] <= 15000.0
+
+        print(f"  ✓ POST /assistant/ask verified!")
+        print(f"  ✓ LLM Response Generated ({len(res_data['answer'])} chars): \"{res_data['answer'][:120]}...\"")
+        print(f"  ✓ Matched Real Products: {len(res_data['matched_products'])} item(s).")
+        results_summary.append(("CHECK 11: RAG AI Shopping Assistant", "PASS"))
+    except Exception as e:
+        print(f"  ❌ CHECK 11 FAILED: {e}")
+        results_summary.append(("CHECK 11: RAG AI Shopping Assistant", "FAIL"))
+        raise
+
+    # --------------------------------------------------------------------------
+    # 13. VALIDATION CHECK 12: MILESTONE 3 AI DATA ANALYST (TEXT-TO-SQL)
+    # --------------------------------------------------------------------------
+    print("\n--- [CHECK 12] AI Data Analyst Text-to-SQL (POST /vendor/{id}/ai-analyst) Validation ---")
+    try:
+        analyst_payload = {"question": "What is my top selling product by units sold?"}
+        analyst_res = client.post("/vendor/1/ai-analyst", json=analyst_payload)
+        assert analyst_res.status_code == 200, f"Expected 200, got {analyst_res.status_code}"
+        analyst_data = analyst_res.json()
+
+        assert "answer" in analyst_data and "sql_query" in analyst_data and "data" in analyst_data
+        assert analyst_data["query_success"] is True
+        assert "SELECT" in analyst_data["sql_query"].upper() or "WITH" in analyst_data["sql_query"].upper()
+
+        print(f"  ✓ POST /vendor/1/ai-analyst verified!")
+        print(f"  ✓ Text-to-SQL Query Generated: {analyst_data['sql_query']}")
+        print(f"  ✓ Natural Language Answer: \"{analyst_data['answer'][:120]}...\"")
+        results_summary.append(("CHECK 12: AI Data Analyst (Text-to-SQL)", "PASS"))
+    except Exception as e:
+        print(f"  ❌ CHECK 12 FAILED: {e}")
+        results_summary.append(("CHECK 12: AI Data Analyst (Text-to-SQL)", "FAIL"))
+        raise
+
+    # --------------------------------------------------------------------------
+    # 14. VALIDATION CHECK 13: PDF REPORT EXPORT (GET /reports/export/vendors-pdf)
+    # --------------------------------------------------------------------------
+    print("\n--- [CHECK 13] PDF Report Export (GET /reports/export/vendors-pdf) Validation ---")
+    try:
+        pdf_res = client.get("/reports/export/vendors-pdf")
+        assert pdf_res.status_code == 200, f"Expected 200, got {pdf_res.status_code}"
+        assert pdf_res.headers.get("content-type") == "application/pdf"
+        assert pdf_res.content.startswith(b"%PDF-"), "Downloaded file does not start with valid PDF magic bytes %PDF-"
+
+        print(f"  ✓ GET /reports/export/vendors-pdf verified!")
+        print(f"  ✓ Valid PDF document generated ({len(pdf_res.content)} bytes, Content-Type: application/pdf).")
+        results_summary.append(("CHECK 13: PDF Report Export", "PASS"))
+    except Exception as e:
+        print(f"  ❌ CHECK 13 FAILED: {e}")
+        results_summary.append(("CHECK 13: PDF Report Export", "FAIL"))
+        raise
+
+    # --------------------------------------------------------------------------
+    # 15. SUMMARY REPORT
     # --------------------------------------------------------------------------
     print("\n==========================================================================")
-    print("📋 MILESTONE 2 ANALYTICAL, SENTIMENT, RESTOCK & TRENDS SUMMARY")
+    print("📋 MILESTONE 3 FULL SUITE VALIDATION SUMMARY")
     print("==========================================================================")
     all_passed = True
     for check_name, status_str in results_summary:
@@ -211,7 +344,7 @@ def run_full_suite_verification():
 
     print("==========================================================================")
     if all_passed:
-        print("🎉 ALL MILESTONE 2 VALIDATION CHECKS PASSED SUCCESSFULLY!")
+        print("🎉 ALL MILESTONE 3 VALIDATION CHECKS PASSED SUCCESSFULLY!")
     else:
         print("❌ SOME VALIDATION CHECKS FAILED.")
     print("==========================================================================")

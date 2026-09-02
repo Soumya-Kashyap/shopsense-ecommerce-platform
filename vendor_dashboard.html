@@ -167,6 +167,23 @@
     }
     .btn-sale-action:hover { background: rgba(16, 185, 129, 0.3); transform: scale(1.03); }
 
+    .btn-csv-export {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; font-weight: 700; font-size: 12px;
+      padding: 8px 16px; border-radius: var(--radius-md); border: none; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 0 16px rgba(16, 185, 129, 0.3);
+      transition: all var(--transition-normal);
+    }
+    .btn-csv-export:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 0 24px rgba(16, 185, 129, 0.5); }
+
+    .btn-csv-export-card {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; font-weight: 800; font-size: 13px;
+      padding: 12px 22px; border-radius: var(--radius-md); border: none; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 0 20px rgba(16, 185, 129, 0.35);
+      transition: all var(--transition-normal);
+    }
+    .btn-csv-export-card:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 0 30px rgba(16, 185, 129, 0.6); }
+    .btn-csv-export-card:disabled { opacity: 0.7; cursor: wait; transform: none; }
+
     .btn-secondary {
       background: var(--bg-card); color: var(--text-main); font-weight: 500; font-size: 13px;
       padding: 8px 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color);
@@ -199,6 +216,12 @@
     }
     .form-textarea { resize: vertical; min-height: 80px; }
     .form-input:focus, .form-textarea:focus, .form-select:focus { border-color: var(--accent-pink); box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.2); }
+
+    /* BENCHMARK PERFORMANCE BADGES */
+    .perf-badge { font-size: 11px; font-weight: 800; text-transform: uppercase; padding: 4px 12px; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px; }
+    .perf-badge.above { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+    .perf-badge.avg { background: rgba(148, 163, 184, 0.15); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.3); }
+    .perf-badge.below { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
 
     /* TABLE */
     .table-responsive { width: 100%; overflow-x: auto; }
@@ -270,35 +293,6 @@
     .modal-title { font-size: 20px; font-weight: 800; color: var(--text-main); }
     .close-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 20px; }
 
-    .modal-product-img-box {
-      width: 240px; height: 240px; border-radius: var(--radius-lg); object-fit: cover;
-      background: rgba(17, 24, 39, 0.8); border: 1px solid var(--border-color-glow);
-      box-shadow: 0 12px 32px rgba(0,0,0,0.5); flex-shrink: 0; margin: 0 auto;
-    }
-
-    .modal-product-img-placeholder {
-      width: 240px; height: 240px; border-radius: var(--radius-lg);
-      background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.25);
-      display: flex; align-items: center; justify-content: center; font-size: 54px; margin: 0 auto;
-    }
-
-    .sentiment-bar-container { display: flex; flex-direction: column; gap: 8px; background: rgba(17, 24, 39, 0.6); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); }
-    .sentiment-bar { height: 10px; border-radius: 5px; background: #1e293b; overflow: hidden; display: flex; }
-    .sentiment-seg-pos { background: var(--accent-emerald); transition: width 300ms ease; }
-    .sentiment-seg-neu { background: var(--accent-amber); transition: width 300ms ease; }
-    .sentiment-seg-neg { background: var(--accent-rose); transition: width 300ms ease; }
-
-    .review-item-card {
-      background: rgba(17, 24, 39, 0.6); border: 1px solid var(--border-color);
-      border-radius: var(--radius-md); padding: 14px 16px; display: flex; flex-direction: column; gap: 8px;
-    }
-
-    .email-preview-box {
-      background: rgba(17, 24, 39, 0.8); border: 1px solid var(--border-color);
-      border-radius: var(--radius-md); padding: 18px; font-size: 13px; color: var(--text-main);
-      white-space: pre-wrap; font-family: monospace; line-height: 1.6; max-height: 280px; overflow-y: auto;
-    }
-
     /* TOAST */
     .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 200; display: flex; flex-direction: column; gap: 10px; }
     .toast { background: var(--bg-card); border: 1px solid var(--border-color); padding: 14px 20px; border-radius: var(--radius-md); box-shadow: 0 10px 30px rgba(0,0,0,0.5); color: var(--text-main); font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; animation: slideIn 300ms ease forwards; }
@@ -359,6 +353,82 @@
 
     <div class="content-area">
 
+      <!-- YOUR PERFORMANCE VS MARKETPLACE WIDGET -->
+      <div class="card-panel" style="background:linear-gradient(135deg, rgba(26,35,54,0.85) 0%, rgba(17,24,39,0.95) 100%); border-color:var(--border-color-glow);">
+        <div class="panel-header" style="border-bottom:1px solid rgba(255,255,255,0.06);">
+          <h2 class="panel-title">
+            <svg style="width:20px;height:20px;stroke:var(--accent-indigo);fill:none;stroke-width:2" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+            Your Performance vs Marketplace Benchmark
+          </h2>
+          <span class="perf-badge avg" id="vendor-perf-badge">● Calculating...</span>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:20px; padding-top:4px;">
+          
+          <div style="background:rgba(17,24,39,0.6); padding:16px; border-radius:var(--radius-md); border:1px solid var(--border-color);">
+            <div style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Your Revenue</div>
+            <div style="font-size:24px; font-weight:900; color:#34d399;" id="v-benchmark-rev">₹0.00</div>
+            <div style="font-size:12px; color:var(--text-subtle); margin-top:2px;">Marketplace Avg: <span id="v-benchmark-avg-rev" style="color:#fff; font-weight:600;">₹0.00</span></div>
+          </div>
+
+          <div style="background:rgba(17,24,39,0.6); padding:16px; border-radius:var(--radius-md); border:1px solid var(--border-color);">
+            <div style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Average Order Value (AOV)</div>
+            <div style="font-size:24px; font-weight:900; color:#60a5fa;" id="v-benchmark-aov">₹0.00</div>
+            <div style="font-size:12px; color:var(--text-subtle); margin-top:2px;">Marketplace Avg: <span id="v-benchmark-avg-aov" style="color:#fff; font-weight:600;">₹0.00</span></div>
+          </div>
+
+          <div style="background:rgba(17,24,39,0.6); padding:16px; border-radius:var(--radius-md); border:1px solid var(--border-color);">
+            <div style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Units Sold</div>
+            <div style="font-size:24px; font-weight:900; color:#facc15;" id="v-benchmark-units">0 units</div>
+            <div style="font-size:12px; color:var(--text-subtle); margin-top:2px;">Marketplace Avg: <span id="v-benchmark-avg-units" style="color:#fff; font-weight:600;">0 units</span></div>
+          </div>
+
+      </div>
+
+      <!-- AI DATA ANALYST SECTION -->
+      <div class="card-panel" style="background:linear-gradient(135deg, rgba(26,35,54,0.9) 0%, rgba(17,24,39,0.95) 100%); border-color:var(--border-color-glow);">
+        <div class="panel-header">
+          <h2 class="panel-title" style="display:flex; align-items:center; gap:10px;">
+            🤖 ShopSense AI Data Analyst
+          </h2>
+          <span style="font-size:12px; color:var(--text-muted);">Your personal sales insights assistant — Ask me anything about your products & sales</span>
+        </div>
+
+        <!-- Example Question Chips -->
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div style="font-size:12px; font-weight:700; color:var(--text-subtle); text-transform:uppercase;">Try Asking AI Analyst:</div>
+          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            <button class="chip-btn" onclick="submitAnalystChip('What is my top selling product by units sold?')">
+              🏆 Top selling product
+            </button>
+            <button class="chip-btn" onclick="submitAnalystChip('What is my total revenue generated across all sales?')">
+              💰 Total revenue generated
+            </button>
+            <button class="chip-btn" onclick="submitAnalystChip('How many total orders have I received?')">
+              📦 Total order count
+            </button>
+            <button class="chip-btn" onclick="submitAnalystChip('Which of my products have low stock under 10 units?')">
+              ⚠️ Low stock products (&lt;10)
+            </button>
+          </div>
+        </div>
+
+        <!-- Response & Chat Box -->
+        <div id="analyst-response-container" style="display:flex; flex-direction:column; gap:12px; min-height:80px; background:rgba(17,24,39,0.6); padding:16px; border-radius:var(--radius-md); border:1px solid var(--border-color);">
+          <div style="font-size:13px; color:var(--text-muted);">
+            Ask a question above or type below to analyze your sales data!
+          </div>
+        </div>
+
+        <!-- Input Bar -->
+        <div style="display:flex; gap:12px; align-items:center; margin-top:4px;">
+          <input class="form-input" type="text" id="analyst-question-input" placeholder="e.g., What is my best selling product?" style="flex:1;" onkeydown="if(event.key==='Enter') handleAskAIAnalyst()" />
+          <button class="btn-gradient" id="btn-ask-analyst" onclick="handleAskAIAnalyst()">
+            ✨ Ask AI Analyst
+          </button>
+        </div>
+      </div>
+
       <!-- SECTION 1: ADD PRODUCT FORM -->
       <div class="card-panel">
         <div class="panel-header">
@@ -404,7 +474,27 @@
         </form>
       </div>
 
-      <!-- SECTION 2: MY CATALOG TABLE WITH RESTOCK & RECORD SALE FEATURE -->
+      <!-- INTERACTIVE CSV EXPORT CARD WIDGET -->
+      <div class="card-panel" style="background:linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(17,24,39,0.9) 100%); border:1px solid rgba(16,185,129,0.3); box-shadow:0 10px 30px rgba(16,185,129,0.1);">
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;">
+          <div style="display:flex; align-items:center; gap:16px;">
+            <div style="width:48px; height:48px; border-radius:var(--radius-md); background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.3); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+              <svg style="width:24px; height:24px; stroke:#34d399; fill:none; stroke-width:2;" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            </div>
+            <div>
+              <div style="font-size:16px; font-weight:800; color:#fff;">Export Your Sales Report</div>
+              <div style="font-size:12px; color:var(--text-muted);">Download a complete spreadsheet report of your catalog products, prices, stock levels, units sold, and gross revenue in CSV format</div>
+            </div>
+          </div>
+
+          <button class="btn-csv-export-card" id="btn-export-csv" onclick="handleExportMySalesCSV()">
+            <span id="btn-export-icon">📥</span>
+            <span id="btn-export-text">Download Sales Report (CSV)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- SECTION 2: MY CATALOG TABLE -->
       <div class="card-panel">
         <div class="panel-header">
           <h2 class="panel-title">
@@ -432,7 +522,7 @@
         </div>
       </div>
 
-      <!-- SECTION 3: TOP PRODUCTS IN YOUR CATEGORY RECOMMENDATION WIDGET -->
+      <!-- SECTION 3: TOP PRODUCTS IN YOUR CATEGORY -->
       <div class="card-panel">
         <div class="panel-header">
           <h2 class="panel-title">
@@ -454,7 +544,7 @@
               </tr>
             </thead>
             <tbody id="top-sector-products-body">
-              <!-- Dynamically populated via GET /products/top-selling?category=...&limit=3 -->
+              <!-- Dynamically populated -->
             </tbody>
           </table>
         </div>
@@ -463,7 +553,7 @@
     </div>
   </main>
 
-  <!-- MODAL 1: PRODUCT DETAILS & SENTIMENT ANALYSIS MODAL -->
+  <!-- MODALS & TOAST -->
   <div class="modal-backdrop" id="view-modal">
     <div class="modal-box">
       <div class="modal-header">
@@ -471,24 +561,18 @@
         <button class="close-btn" onclick="closeModal('view-modal')">✕</button>
       </div>
 
-      <!-- Part A: Product Info Overview -->
       <div style="display:flex; flex-direction:row; gap:20px; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:16px;">
         <div id="view-prod-img-box"></div>
-        
         <div style="display:flex; flex-direction:column; gap:6px; flex:1;">
           <div style="font-size:12px; color:var(--text-muted);" id="view-prod-id">Product ID: #0</div>
           <div class="category-badge" id="view-prod-category">VISION: Electronics</div>
           <div style="font-size:26px; font-weight:900; color:#34d399; margin-top:2px;" id="view-prod-price">₹0.00</div>
           <div style="font-size:13px; font-weight:700; color:#fff;" id="view-prod-stock">Stock: 0 units</div>
-          
-          <div style="font-size:12px; color:var(--text-main); background:rgba(17,24,39,0.6); padding:10px; border-radius:var(--radius-sm); border:1px solid var(--border-color); margin-top:4px;" id="view-prod-desc">
-            --
-          </div>
+          <div style="font-size:12px; color:var(--text-main); background:rgba(17,24,39,0.6); padding:10px; border-radius:var(--radius-sm); border:1px solid var(--border-color); margin-top:4px;" id="view-prod-desc">--</div>
           <div class="tag-pill-container" id="view-prod-tags"></div>
         </div>
       </div>
 
-      <!-- Part B: Aggregate Sentiment Breakdown Summary -->
       <div style="display:flex; flex-direction:column; gap:12px;">
         <div style="display:flex; align-items:center; justify-content:space-between;">
           <h4 style="font-size:15px; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
@@ -523,22 +607,15 @@
         </div>
       </div>
 
-      <!-- Part C: Individual Customer Reviews List -->
       <div style="display:flex; flex-direction:column; gap:10px;">
         <h5 style="font-size:13px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Customer Reviews</h5>
-        <div id="reviews-list-container" style="display:flex; flex-direction:column; gap:10px; max-height:220px; overflow-y:auto;">
-          <!-- Dynamically populated -->
-        </div>
+        <div id="reviews-list-container" style="display:flex; flex-direction:column; gap:10px; max-height:220px; overflow-y:auto;"></div>
       </div>
 
-      <!-- Part D: Submit Test Review Form -->
       <div style="background:rgba(17,24,39,0.6); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:16px; display:flex; flex-direction:column; gap:12px;">
-        <h5 style="font-size:13px; font-weight:800; color:#fff; display:flex; align-items:center; gap:6px;">
-          ✍️ Submit Test Customer Review (Demo)
-        </h5>
-        
+        <h5 style="font-size:13px; font-weight:800; color:#fff;">✍️ Submit Test Customer Review (Demo)</h5>
         <div style="display:grid; grid-template-columns:2fr 1fr; gap:12px;">
-          <input class="form-input" type="text" id="modal-review-name" placeholder="Customer Name (e.g. Ananya Rao)" required style="padding:8px 12px; font-size:13px;" />
+          <input class="form-input" type="text" id="modal-review-name" placeholder="Customer Name" required style="padding:8px 12px; font-size:13px;" />
           <select class="form-select" id="modal-review-rating" style="padding:8px 12px; font-size:13px;">
             <option value="5">★★★★★ (5 Stars)</option>
             <option value="4">★★★★☆ (4 Stars)</option>
@@ -547,13 +624,9 @@
             <option value="1">★☆☆☆☆ (1 Star)</option>
           </select>
         </div>
-        
-        <textarea class="form-textarea" id="modal-review-text" placeholder="Write review text (e.g. Amazing audio clarity and comfortable design!)..." style="min-height:54px; font-size:13px; padding:10px;"></textarea>
-
+        <textarea class="form-textarea" id="modal-review-text" placeholder="Write review text..." style="min-height:54px; font-size:13px; padding:10px;"></textarea>
         <div style="display:flex; justify-content:flex-end;">
-          <button class="btn-ai-submit" style="padding:8px 16px; font-size:13px;" onclick="handleAddTestReviewSubmit()">
-            ✨ Post Customer Review & Analyze Sentiment
-          </button>
+          <button class="btn-ai-submit" style="padding:8px 16px; font-size:13px;" onclick="handleAddTestReviewSubmit()">✨ Post Review & Analyze</button>
         </div>
       </div>
 
@@ -563,7 +636,6 @@
     </div>
   </div>
 
-  <!-- MODAL 2: RESTOCK INVENTORY MODAL (REQUIREMENT 1) -->
   <div class="modal-backdrop" id="restock-modal">
     <div class="modal-box" style="max-width:440px;">
       <div class="modal-header">
@@ -583,43 +655,11 @@
 
       <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:12px;">
         <button class="btn-secondary" onclick="closeModal('restock-modal')">Cancel</button>
-        <button class="btn-gradient" onclick="handleConfirmRestockSubmit()">
-          📦 Confirm Restock
-        </button>
+        <button class="btn-gradient" onclick="handleConfirmRestockSubmit()">📦 Confirm Restock</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL 3: AI MARKETING STUDIO EMAIL MODAL -->
-  <div class="modal-backdrop" id="email-modal">
-    <div class="modal-box">
-      <div class="modal-header">
-        <h3 class="modal-title">✉️ AI Marketing Studio</h3>
-        <button class="close-btn" onclick="closeModal('email-modal')">✕</button>
-      </div>
-
-      <div style="display:flex; flex-direction:column; gap:6px;">
-        <span style="font-size:12px; font-weight:700; color:var(--accent-pink); text-transform:uppercase;">Subject Line</span>
-        <div style="font-size:14px; font-weight:700; color:#fff; background:rgba(17,24,39,0.8); padding:12px 14px; border-radius:var(--radius-md); border:1px solid var(--border-color);" id="email-subject-box">
-          --
-        </div>
-      </div>
-
-      <div style="display:flex; flex-direction:column; gap:6px;">
-        <span style="font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Generated Promotional Email Body</span>
-        <div class="email-preview-box" id="email-body-box">--</div>
-      </div>
-
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
-        <span style="font-size:12px; color:var(--text-muted);">Ready to send to your customer mailing list</span>
-        <button class="btn-ai-submit" style="padding:8px 16px; font-size:13px;" onclick="copyEmailContent()">
-          📋 Copy Email Content
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- TOAST CONTAINER -->
   <div class="toast-container" id="toast-container"></div>
 
   <!-- JAVASCRIPT APP LOGIC -->
@@ -650,6 +690,7 @@
       document.getElementById('vendor-display-email').textContent = vendorEmail;
 
       loadMyCatalog();
+      fetchVendorOwnBenchmark();
     });
 
     function handleLogout() {
@@ -657,18 +698,65 @@
       window.location.href = 'login.html';
     }
 
+    // REQUIREMENT 4: EXPORT MY SALES REPORT CSV TRIGGER FUNCTION
+    function handleExportMySalesCSV() {
+      if (!vendorId) return;
+      const btn = document.getElementById('btn-export-csv');
+      const textSpan = document.getElementById('btn-export-text');
+      const iconSpan = document.getElementById('btn-export-icon');
+
+      if (btn) btn.disabled = true;
+      if (textSpan) textSpan.textContent = 'Generating Report...';
+      if (iconSpan) iconSpan.textContent = '⏳';
+
+      window.location.href = `${API_BASE}/products/${vendorId}/export/sales-csv`;
+      showToast('Downloading Sales Report CSV file...', 'success');
+
+      setTimeout(() => {
+        if (btn) btn.disabled = false;
+        if (textSpan) textSpan.textContent = 'Download Sales Report (CSV)';
+        if (iconSpan) iconSpan.textContent = '📥';
+      }, 1500);
+    }
+
     async function handleRefreshCatalog() {
-      await loadMyCatalog();
-      showToast('Product catalog & sector recommendations refreshed!', 'success');
+      await Promise.all([loadMyCatalog(), fetchVendorOwnBenchmark()]);
+      showToast('Catalog & performance benchmarks refreshed!', 'success');
+    }
+
+    async function fetchVendorOwnBenchmark() {
+      try {
+        const response = await fetch(`${API_BASE}/analytics/benchmarks`);
+        if (!response.ok) throw new Error('Benchmark fetch error');
+        const data = await response.json();
+        const avg = data.marketplace_averages;
+
+        const myBench = data.vendors.find(v => v.vendor_id === parseInt(vendorId));
+
+        document.getElementById('v-benchmark-avg-rev').textContent = `₹${avg.avg_revenue_per_vendor.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+        document.getElementById('v-benchmark-avg-aov').textContent = `₹${avg.avg_order_value.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+        document.getElementById('v-benchmark-avg-units').textContent = `${avg.avg_units_per_vendor} units`;
+
+        if (myBench) {
+          document.getElementById('v-benchmark-rev').textContent = `₹${myBench.revenue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+          document.getElementById('v-benchmark-aov').textContent = `₹${myBench.aov.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+          document.getElementById('v-benchmark-units').textContent = `${myBench.units_sold} units`;
+
+          const badgeEl = document.getElementById('vendor-perf-badge');
+          badgeEl.className = 'perf-badge ' + (myBench.performance === 'Above Average' ? 'above' : myBench.performance === 'Below Average' ? 'below' : 'avg');
+          const symbol = myBench.performance === 'Above Average' ? '▲' : myBench.performance === 'Below Average' ? '▼' : '●';
+          badgeEl.textContent = `${symbol} ${myBench.performance}`;
+        }
+      } catch (err) {
+        console.error('Failed to load vendor benchmark', err);
+      }
     }
 
     function handleImageFileSelect(event) {
       const file = event.target.files[0];
       if (file) {
         const reader = new FileReader();
-        reader.onload = function (e) {
-          base64ImageString = e.target.result;
-        };
+        reader.onload = function (e) { base64ImageString = e.target.result; };
         reader.readAsDataURL(file);
       } else {
         base64ImageString = null;
@@ -677,43 +765,15 @@
 
     function generateAIContent(name, basicDesc) {
       const text = (name + ' ' + basicDesc).toLowerCase();
-
       let category = 'Electronics';
-      if (text.includes('shirt') || text.includes('hoodie') || text.includes('apparel') || text.includes('jacket') || text.includes('wear')) {
-        category = 'Fashion & Apparel';
-      } else if (text.includes('speaker') || text.includes('headphone') || text.includes('earbud') || text.includes('sound') || text.includes('audio')) {
-        category = 'Audio & Acoustics';
-      } else if (text.includes('watch') || text.includes('band') || text.includes('fitness') || text.includes('smartwatch')) {
-        category = 'Wearables & Smart Devices';
-      } else if (text.includes('home') || text.includes('kitchen') || text.includes('living') || text.includes('light')) {
-        category = 'Home & Living';
-      }
+      if (text.includes('shirt') || text.includes('apparel') || text.includes('wear')) category = 'Fashion & Apparel';
+      else if (text.includes('speaker') || text.includes('headphone') || text.includes('sound') || text.includes('audio')) category = 'Audio & Acoustics';
+      else if (text.includes('watch') || text.includes('smartwatch')) category = 'Wearables & Smart Devices';
 
       const cleanName = name.trim();
       const cleanDesc = basicDesc.trim();
-      const enhancedDesc = `Experience unmatched performance with the all-new ${cleanName}. Engineered with state-of-the-art craftsmanship: "${cleanDesc}". Perfect for modern lifestyle enthusiasts seeking premium quality, reliability, and value.`;
-
-      const tagsSet = new Set();
-      if (text.includes('wireless') || text.includes('bluetooth')) tagsSet.add('#WirelessTech');
-      if (text.includes('noise') || text.includes('canceling')) tagsSet.add('#NoiseCancel');
-      if (text.includes('smart') || text.includes('watch')) tagsSet.add('#SmartDevice');
-      if (text.includes('hd') || text.includes('4k') || text.includes('display')) tagsSet.add('#UltraHD');
-      if (text.includes('battery') || text.includes('power')) tagsSet.add('#LongBattery');
-      if (text.includes('water') || text.includes('waterproof')) tagsSet.add('#IPX7Waterproof');
-
-      const nameWords = cleanName.split(/\s+/).filter(w => w.length > 3).slice(0, 2);
-      nameWords.forEach(w => tagsSet.add(`#${w.replace(/[^a-zA-Z0-9]/g, '')}`));
-      tagsSet.add('#PremiumQuality');
-      tagsSet.add('#TopRated2026');
-
-      const tagsList = Array.from(tagsSet).slice(0, 5);
-
-      return {
-        category: `VISION: ${category}`,
-        enhancedDesc: enhancedDesc,
-        tagsString: tagsList.join(','),
-        tagsList: tagsList
-      };
+      const enhancedDesc = `Experience unmatched performance with the all-new ${cleanName}. Engineered with state-of-the-art craftsmanship: "${cleanDesc}".`;
+      return { category: `VISION: ${category}`, enhancedDesc: enhancedDesc, tagsString: '#WirelessTech,#PremiumQuality,#TopRated2026' };
     }
 
     async function loadMyCatalog() {
@@ -744,22 +804,16 @@
 
           return `
             <tr>
-              <td>
-                ${p.image_url ? `<img class="product-img-thumb" src="${p.image_url}" alt="${escapeHtml(p.name)}" />` : `<div class="product-img-placeholder">📦</div>`}
-              </td>
+              <td>${p.image_url ? `<img class="product-img-thumb" src="${p.image_url}" alt="${escapeHtml(p.name)}" />` : `<div class="product-img-placeholder">📦</div>`}</td>
               <td>
                 <div style="font-weight:700; color:#fff;">${escapeHtml(p.name)}</div>
                 <div class="category-badge">${p.category ? escapeHtml(p.category) : 'VISION: Electronics'}</div>
               </td>
               <td>
                 <div style="font-size:13px; color:var(--text-main); line-height:1.4;">${escapeHtml(p.description || '')}</div>
-                <div class="tag-pill-container">
-                  ${tagsArray.map(t => `<span class="tag-pill">${escapeHtml(t)}</span>`).join('')}
-                </div>
+                <div class="tag-pill-container">${tagsArray.map(t => `<span class="tag-pill">${escapeHtml(t)}</span>`).join('')}</div>
               </td>
-              <td>
-                <span style="font-weight:800; color:#34d399;">₹${p.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
-              </td>
+              <td><span style="font-weight:800; color:#34d399;">₹${p.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span></td>
               <td>
                 <div style="display:flex; flex-direction:column; align-items:flex-start;">
                   <span style="font-weight:700; color:#fff;">${p.stock_qty} units</span>
@@ -768,18 +822,9 @@
               </td>
               <td>
                 <div style="display:flex; gap:6px; flex-direction:column;">
-                  <button class="btn-sale-action" onclick="handleRecordSale(${p.id}, '${escapeHtml(p.name)}')">
-                    🛒 Record Sale
-                  </button>
-                  <button class="btn-secondary" style="font-size:11px; padding:4px 8px; color:#60a5fa; border-color:rgba(59,130,246,0.3);" onclick="openRestockModal(${p.id})">
-                    📦 Restock
-                  </button>
-                  <button class="btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="openViewProductModal(${p.id})">
-                    👁️ View & Reviews
-                  </button>
-                  <button class="btn-secondary" style="font-size:11px; padding:4px 8px; color:var(--accent-pink); border-color:rgba(236,72,153,0.3);" onclick="openAIEmailModal(${p.id})">
-                    ✉️ AI Email
-                  </button>
+                  <button class="btn-sale-action" onclick="handleRecordSale(${p.id}, '${escapeHtml(p.name)}')">🛒 Record Sale</button>
+                  <button class="btn-secondary" style="font-size:11px; padding:4px 8px; color:#60a5fa; border-color:rgba(59,130,246,0.3);" onclick="openRestockModal(${p.id})">📦 Restock</button>
+                  <button class="btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="openViewProductModal(${p.id})">👁️ View & Reviews</button>
                 </div>
               </td>
             </tr>
@@ -802,30 +847,14 @@
           return;
         }
 
-        const rankBadge = (index) => {
-          if (index === 0) return `<span class="rank-badge rank-1">🥇 #1</span>`;
-          if (index === 1) return `<span class="rank-badge rank-2">🥈 #2</span>`;
-          return `<span class="rank-badge rank-3">🥉 #3</span>`;
-        };
-
         tbody.innerHTML = topProducts.map((p, idx) => `
           <tr>
-            <td>${rankBadge(idx)}</td>
-            <td>
-              <div style="font-weight:700; color:#fff;">${escapeHtml(p.product_name)}</div>
-            </td>
-            <td>
-              <div style="font-weight:600; color:var(--text-main);">${escapeHtml(p.vendor_name)}</div>
-            </td>
-            <td>
-              <span class="category-badge">${escapeHtml(p.category || 'VISION: Electronics')}</span>
-            </td>
-            <td>
-              <span style="font-weight:800; color:#fff;">${p.units_sold} units</span>
-            </td>
-            <td>
-              <span style="font-weight:800; color:#34d399;">₹${p.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
-            </td>
+            <td><span class="rank-badge rank-${idx+1}">#${idx+1}</span></td>
+            <td><div style="font-weight:700; color:#fff;">${escapeHtml(p.product_name)}</div></td>
+            <td><div style="font-weight:600; color:var(--text-main);">${escapeHtml(p.vendor_name)}</div></td>
+            <td><span class="category-badge">${escapeHtml(p.category || 'VISION: Electronics')}</span></td>
+            <td><span style="font-weight:800; color:#fff;">${p.units_sold} units</span></td>
+            <td><span style="font-weight:800; color:#34d399;">₹${p.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span></td>
           </tr>
         `).join('');
       } catch (err) {
@@ -833,29 +862,20 @@
       }
     }
 
-    // REQUIREMENT 1: RESTOCK MODAL HANDLERS
     function openRestockModal(productId) {
       const p = vendorProductsMap[productId];
       if (!p) return;
-
       activeRestockProductId = productId;
       document.getElementById('restock-modal-prod-name').textContent = p.name;
       document.getElementById('restock-modal-current-stock').textContent = `Current Stock: ${p.stock_qty} units`;
       document.getElementById('restock-qty-input').value = 20;
-
       document.getElementById('restock-modal').classList.add('active');
     }
 
     async function handleConfirmRestockSubmit() {
       if (!activeRestockProductId) return;
-
-      const qtyInput = document.getElementById('restock-qty-input');
-      const qty = parseInt(qtyInput.value);
-
-      if (isNaN(qty) || qty <= 0) {
-        showToast('Please enter a valid restock quantity greater than 0', 'error');
-        return;
-      }
+      const qty = parseInt(document.getElementById('restock-qty-input').value);
+      if (isNaN(qty) || qty <= 0) return showToast('Please enter a valid quantity', 'error');
 
       try {
         const response = await fetch(`${API_BASE}/products/${activeRestockProductId}/restock`, {
@@ -863,13 +883,12 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ quantity: qty })
         });
-
         const result = await response.json();
         if (!response.ok) throw new Error(result.detail || 'Restock failed');
-
-        showToast(`📦 Restocked! ${result.product_name} stock increased to ${result.new_stock_qty} units.`, 'success');
+        showToast(`📦 Restocked ${result.product_name} to ${result.new_stock_qty} units!`, 'success');
         closeModal('restock-modal');
         loadMyCatalog();
+        fetchVendorOwnBenchmark();
       } catch (err) {
         showToast(err.message, 'error');
       }
@@ -888,15 +907,7 @@
       document.getElementById('view-prod-desc').textContent = p.description || 'No description';
 
       const imgBox = document.getElementById('view-prod-img-box');
-      if (p.image_url) {
-        imgBox.innerHTML = `<img class="modal-product-img-box" src="${p.image_url}" alt="${escapeHtml(p.name)}" />`;
-      } else {
-        imgBox.innerHTML = `<div class="modal-product-img-placeholder">📦</div>`;
-      }
-
-      const tagsContainer = document.getElementById('view-prod-tags');
-      const tagsArray = p.tags ? p.tags.split(',') : [];
-      tagsContainer.innerHTML = tagsArray.map(t => `<span class="tag-pill">${escapeHtml(t)}</span>`).join('');
+      imgBox.innerHTML = p.image_url ? `<img class="product-img-thumb" style="width:140px;height:140px;" src="${p.image_url}" />` : `<div class="product-img-placeholder" style="width:140px;height:140px;">📦</div>`;
 
       await loadProductReviews(productId);
       document.getElementById('view-modal').classList.add('active');
@@ -906,95 +917,60 @@
       const listContainer = document.getElementById('reviews-list-container');
       try {
         const response = await fetch(`${API_BASE}/products/${productId}/reviews`);
-        if (!response.ok) throw new Error('Reviews fetch error');
+        if (!response.ok) throw new Error();
         const data = await response.json();
         const agg = data.aggregate;
         const reviews = data.reviews;
 
         document.getElementById('sentiment-avg-rating').textContent = `★ ${agg.average_rating.toFixed(1)} / 5.0 (${agg.total_reviews} reviews)`;
         document.getElementById('sentiment-pos-headline').textContent = `${agg.positive_percentage}% Positive`;
-
         document.getElementById('sentiment-bar-pos').style.width = `${agg.positive_percentage}%`;
         document.getElementById('sentiment-bar-neu').style.width = `${agg.neutral_percentage}%`;
         document.getElementById('sentiment-bar-neg').style.width = `${agg.negative_percentage}%`;
-
-        document.getElementById('sentiment-lbl-pos').textContent = `${agg.positive_percentage}%`;
-        document.getElementById('sentiment-lbl-neu').textContent = `${agg.neutral_percentage}%`;
-        document.getElementById('sentiment-lbl-neg').textContent = `${agg.negative_percentage}%`;
 
         document.getElementById('top-pros-list').textContent = agg.top_pros.join(' • ');
         document.getElementById('top-cons-list').textContent = agg.top_cons.join(' • ');
 
         if (reviews.length === 0) {
-          listContainer.innerHTML = `<div style="font-size:12px; color:var(--text-subtle); padding:12px; text-align:center;">No customer reviews submitted yet. Use the form below to post a test review!</div>`;
+          listContainer.innerHTML = `<div style="font-size:12px; color:var(--text-subtle); padding:10px;">No reviews yet.</div>`;
           return;
         }
 
-        const starStr = (r) => '★'.repeat(r) + '☆'.repeat(5 - r);
-
         listContainer.innerHTML = reviews.map(r => `
           <div class="review-item-card">
-            <div style="display:flex; align-items:center; justify-content:space-between;">
-              <div style="display:flex; align-items:center; gap:8px;">
-                <span style="font-weight:700; color:#fff; font-size:13px;">${escapeHtml(r.customer_name)}</span>
-                <span style="color:#fbbf24; font-size:12px;">${starStr(r.rating)}</span>
-              </div>
-              <span class="sentiment-badge ${r.sentiment_label}">
-                ${r.sentiment_label === 'Positive' ? '😊 Positive' : r.sentiment_label === 'Negative' ? '😞 Negative' : '😐 Neutral'}
-              </span>
+            <div style="display:flex; justify-content:space-between;">
+              <span style="font-weight:700; color:#fff; font-size:13px;">${escapeHtml(r.customer_name)}</span>
+              <span class="sentiment-badge ${r.sentiment_label}">${r.sentiment_label}</span>
             </div>
-            
-            <div style="font-size:12px; color:var(--text-main); line-height:1.4;">${escapeHtml(r.review_text)}</div>
-            
-            <div style="display:flex; gap:10px; font-size:11px; margin-top:2px;">
-              ${r.pros ? `<span style="color:#34d399;">👍 <b>Pros:</b> ${escapeHtml(r.pros)}</span>` : ''}
-              ${r.cons ? `<span style="color:#f87171;">👎 <b>Cons:</b> ${escapeHtml(r.cons)}</span>` : ''}
-            </div>
+            <div style="font-size:12px; color:var(--text-main);">${escapeHtml(r.review_text)}</div>
           </div>
         `).join('');
       } catch (err) {
-        listContainer.innerHTML = `<div style="font-size:12px; color:var(--accent-rose); padding:10px;">Failed to load reviews & sentiment.</div>`;
+        listContainer.innerHTML = `<div style="font-size:12px; color:var(--accent-rose);">Failed to load reviews.</div>`;
       }
     }
 
     async function handleAddTestReviewSubmit() {
       if (!activeModalProductId) return;
+      const name = document.getElementById('modal-review-name').value.trim();
+      const text = document.getElementById('modal-review-text').value.trim();
+      const rating = parseInt(document.getElementById('modal-review-rating').value);
 
-      const nameInput = document.getElementById('modal-review-name');
-      const textInput = document.getElementById('modal-review-text');
-      const ratingSelect = document.getElementById('modal-review-rating');
-
-      const customerName = nameInput.value.trim();
-      const reviewText = textInput.value.trim();
-      const rating = parseInt(ratingSelect.value);
-
-      if (!customerName || !reviewText) {
-        showToast('Please enter customer name and review text', 'error');
-        return;
-      }
+      if (!name || !text) return showToast('Please enter name and review', 'error');
 
       try {
         const response = await fetch(`${API_BASE}/products/${activeModalProductId}/reviews`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            customer_name: customerName,
-            review_text: reviewText,
-            rating: rating
-          })
+          body: JSON.stringify({ customer_name: name, review_text: text, rating: rating })
         });
-
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.detail || 'Review submission failed');
-
-        showToast(`Review posted! Analyzed as ${result.sentiment_label} (${result.sentiment_score >= 0 ? '+' : ''}${result.sentiment_score})`, 'success');
-        
-        nameInput.value = '';
-        textInput.value = '';
-
+        if (!response.ok) throw new Error();
+        showToast('Review posted and analyzed!', 'success');
+        document.getElementById('modal-review-name').value = '';
+        document.getElementById('modal-review-text').value = '';
         await loadProductReviews(activeModalProductId);
       } catch (err) {
-        showToast(err.message, 'error');
+        showToast('Failed to post review', 'error');
       }
     }
 
@@ -1004,12 +980,11 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' }
         });
-
         const result = await response.json();
         if (!response.ok) throw new Error(result.detail || 'Sale recording failed');
-
         showToast(`🎉 Sale Recorded! Sold 1x "${productName}" (₹${result.sale_amount.toLocaleString('en-IN')})`, 'success');
         loadMyCatalog();
+        fetchVendorOwnBenchmark();
       } catch (err) {
         showToast(err.message, 'error');
       }
@@ -1019,7 +994,6 @@
       event.preventDefault();
       const btn = document.getElementById('btn-save-product');
       btn.disabled = true;
-      btn.innerHTML = '✨ Generating AI Copy & Tags...';
 
       const rawName = document.getElementById('prod-name').value.trim();
       const rawDesc = document.getElementById('prod-desc').value.trim();
@@ -1045,45 +1019,65 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-
         const result = await response.json();
         if (!response.ok) throw new Error(result.detail || 'Failed to save product');
 
-        showToast(`Product "${result.name}" saved with AI tags!`, 'success');
+        showToast(`Product "${result.name}" saved!`, 'success');
         document.getElementById('product-form').reset();
         base64ImageString = null;
-
         loadMyCatalog();
       } catch (err) {
         showToast(err.message, 'error');
       } finally {
         btn.disabled = false;
-        btn.innerHTML = '✨ Generate AI Tags & Save Product';
       }
     }
 
-    function openAIEmailModal(productId) {
-      const p = vendorProductsMap[productId];
-      if (!p) return;
-
-      const subject = `🚀 Exclusive Product Launch: Introducing the ${p.name}!`;
-      const body = `Hi {{Customer_Name}},\n\nWe are thrilled to present our newest arrival: the ${p.name}!\n\n${p.description}\n\nProduct Overview:\n- Category: ${p.category || 'VISION: Electronics'}\n- Retail Price: ₹${p.price.toLocaleString('en-IN')}\n- SEO Tags: ${(p.tags || '').replace(/,/g, ' ')}\n\nAvailable in limited quantities. Order yours today!\n\nBest regards,\nThe ${sessionStorage.getItem('name') || 'ShopSense'} Sales Team`;
-
-      document.getElementById('email-subject-box').textContent = subject;
-      document.getElementById('email-body-box').textContent = body;
-      document.getElementById('email-modal').classList.add('active');
+    function submitAnalystChip(questionText) {
+      document.getElementById('analyst-question-input').value = questionText;
+      handleAskAIAnalyst();
     }
 
-    function copyEmailContent() {
-      const subject = document.getElementById('email-subject-box').textContent;
-      const body = document.getElementById('email-body-box').textContent;
-      const fullText = `Subject: ${subject}\n\n${body}`;
+    async function handleAskAIAnalyst() {
+      const inputEl = document.getElementById('analyst-question-input');
+      const question = inputEl.value.trim();
+      if (!question) return;
 
-      navigator.clipboard.writeText(fullText).then(() => {
-        showToast('AI Email content copied to clipboard!', 'success');
-      }).catch(() => {
-        showToast('Failed to copy content.', 'error');
-      });
+      const container = document.getElementById('analyst-response-container');
+      const btn = document.getElementById('btn-ask-analyst');
+
+      btn.disabled = true;
+      container.innerHTML = `
+        <div style="display:flex; align-items:center; gap:10px; font-size:13px; color:var(--accent-indigo); font-weight:600;">
+          <span style="display:inline-block;">⚡</span>
+          Analyzing database schema and generating Text-to-SQL insights...
+        </div>
+      `;
+
+      try {
+        const response = await fetch(`${API_BASE}/vendor/${vendorId}/ai-analyst`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question: question })
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || 'AI Analyst request failed');
+
+        container.innerHTML = `
+          <div style="font-size:14px; font-weight:600; color:#fff; line-height:1.5;">
+            ${escapeHtml(data.answer).replace(/\n/g, '<br/>')}
+          </div>
+        `;
+      } catch (err) {
+        container.innerHTML = `
+          <div style="font-size:13px; color:var(--accent-rose); font-weight:600;">
+            ⚠️ Error: ${escapeHtml(err.message)}
+          </div>
+        `;
+      } finally {
+        btn.disabled = false;
+      }
     }
 
     function closeModal(modalId) {

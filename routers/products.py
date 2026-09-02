@@ -1,12 +1,16 @@
+import csv
+import io
+import asyncio
 from datetime import datetime, timezone
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc
 
 from database import get_db
 import models
 import schemas
+from websocket_manager import manager
 
 router = APIRouter(
     tags=["Products"]
@@ -116,6 +120,7 @@ def simulate_product_sale(product_id: int, db: Session = Depends(get_db)):
     - Decrements stock_qty by 1.
     - Creates a Transaction record.
     - Logs a live ActivityLog event.
+    - Broadcasts real-time WebSocket sale notification to connected admin dashboards.
     """
     product = db.query(models.Product).filter(models.Product.id == product_id).first()
     if not product:
@@ -158,6 +163,22 @@ def simulate_product_sale(product_id: int, db: Session = Depends(get_db)):
 
     db.commit()
     db.refresh(product)
+
+    # Broadcast WebSocket notification payload to all connected admin dashboards
+    notification_payload = {
+        "event": "new_sale",
+        "vendor_name": vendor_name,
+        "product_name": product.name,
+        "sale_amount": round(product.price, 2),
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+
+    try:
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            asyncio.create_task(manager.broadcast(notification_payload))
+    except Exception as err:
+        print(f"WebSocket broadcast warning: {err}")
 
     return {
         "message": f"Successfully recorded sale of '{product.name}'!",
@@ -205,6 +226,71 @@ def restock_product_inventory(
         "new_stock_qty": product.stock_qty,
         "message": f"Successfully restocked '{product.name}' by {restock.quantity} units! New stock: {product.stock_qty}."
     }
+
+
+@router.get("/products/{vendor_id}/export/sales-csv")
+def export_vendor_product_sales_csv(vendor_id: int, db: Session = Depends(get_db)):
+    """
+    GET /products/{vendor_id}/export/sales-csv:
+    Generates a CSV file containing a specific vendor's own product sales data:
+    Product Name, Category, Price (INR), Stock, Units Sold, Revenue Generated.
+    """
+    vendor = db.query(models.Vendor).filter(models.Vendor.id == vendor_id).first()
+    if not vendor:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Vendor with ID {vendor_id} not found."
+        )
+
+    products = db.query(models.Product).filter(models.Product.vendor_id == vendor_id).all()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+
+    # Header
+    writer.writerow([
+        "Product ID",
+        "Product Name",
+        "Category",
+        "Unit Price (INR)",
+        "Current Stock Qty",
+        "Units Sold",
+        "Revenue Generated (INR)"
+    ])
+
+    for p in products:
+        p_stats = (
+            db.query(
+                func.coalesce(func.sum(models.Transaction.quantity), 0).label("units_sold"),
+                func.coalesce(func.sum(models.Transaction.total_amount), 0.0).label("revenue")
+            )
+            .filter(models.Transaction.product_id == p.id)
+            .first()
+        )
+
+        units = int(p_stats.units_sold) if p_stats and p_stats.units_sold else 0
+        rev = round(float(p_stats.revenue), 2) if p_stats and p_stats.revenue else 0.0
+        cat_clean = (p.category or "Electronics").replace("VISION: ", "").strip()
+
+        writer.writerow([
+            p.id,
+            p.name,
+            cat_clean,
+            f"{p.price:.2f}",
+            p.stock_qty,
+            units,
+            f"{rev:.2f}"
+        ])
+
+    csv_content = output.getvalue()
+    filename = f"vendor_{vendor_id}_sales_report.csv"
+    return Response(
+        content=csv_content,
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": f"attachment; filename={filename}"
+        }
+    )
 
 
 @router.get("/vendors/{vendor_id}/products", response_model=list[schemas.ProductResponse])

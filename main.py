@@ -8,7 +8,7 @@ from sqlalchemy import func, desc
 import models
 import schemas
 from database import engine, get_db, SessionLocal
-from routers import vendors, products, inventory, customers, reviews, analytics
+from routers import vendors, products, inventory, customers, reviews, analytics, charts, reports, notifications, assistant, analyst
 from auth import hash_password
 
 # Create database tables automatically on startup if they do not exist
@@ -46,7 +46,7 @@ init_admin_user()
 app = FastAPI(
     title="ShopSense API",
     description="Multi-Vendor E-Commerce Analytics Platform with Auth & Activity Feed",
-    version="2.3.0"
+    version="3.4.0"
 )
 
 # Enable CORS Middleware
@@ -65,6 +65,11 @@ app.include_router(inventory.router)
 app.include_router(customers.router)
 app.include_router(reviews.router)
 app.include_router(analytics.router)
+app.include_router(charts.router)
+app.include_router(reports.router)
+app.include_router(notifications.router)
+app.include_router(assistant.router)
+app.include_router(analyst.router)
 
 
 @app.get("/")
@@ -75,8 +80,9 @@ def read_root():
         "login_url": "http://127.0.0.1:8000/login-page",
         "admin_dashboard_url": "http://127.0.0.1:8000/admin-dashboard",
         "vendor_dashboard_url": "http://127.0.0.1:8000/vendor-dashboard",
+        "shopping_assistant_url": "http://127.0.0.1:8000/shopping-assistant",
         "currency": "INR (₹)",
-        "milestone": "Milestone 1 - Auth, RBAC, Vendor Analytics, Activity Feed & Catalog"
+        "milestone": "Milestone 3 - RAG AI Assistant, WebSockets, Charts & Benchmarking"
     }
 
 
@@ -85,66 +91,55 @@ def get_global_stats(db: Session = Depends(get_db)):
     """
     Analytics Endpoint: Global platform metrics, revenue in ₹ INR, and Top Vendor of the Month.
     """
-    active_vendors = db.query(models.Vendor).filter(models.Vendor.role == "vendor", models.Vendor.status == "active").count()
-    catalog_products = db.query(models.Product).count()
-    total_transactions = db.query(models.Transaction).count()
+    active_vendors_count = db.query(models.Vendor).filter(models.Vendor.status == "active", models.Vendor.role == "vendor").count()
+    pending_vendors_count = db.query(models.Vendor).filter(models.Vendor.status == "pending", models.Vendor.role == "vendor").count()
 
-    # Calculate Total Platform Revenue joining active products & vendors
-    total_revenue_result = (
-        db.query(func.sum(models.Transaction.total_amount))
-        .join(models.Product, models.Transaction.product_id == models.Product.id)
-        .join(models.Vendor, models.Product.vendor_id == models.Vendor.id)
-        .filter(models.Vendor.role == "vendor")
-        .scalar()
-    )
-    total_revenue = float(total_revenue_result) if total_revenue_result else 0.0
+    total_revenue = db.query(func.sum(models.Transaction.total_amount)).scalar() or 0.0
 
-    # Calculate Top Vendor of the Month (Vendor with highest total revenue in Transactions)
     top_vendor_query = (
         db.query(
-            models.Vendor.name.label("vendor_name"),
-            func.sum(models.Transaction.total_amount).label("total_rev"),
-            func.count(models.Transaction.id).label("orders_count")
+            models.Vendor.id,
+            models.Vendor.name,
+            func.sum(models.Transaction.total_amount).label("revenue"),
+            func.count(models.Transaction.id).label("orders")
         )
-        .join(models.Product, models.Vendor.id == models.Product.vendor_id)
-        .join(models.Transaction, models.Product.id == models.Transaction.product_id)
-        .filter(models.Vendor.role == "vendor")
+        .join(models.Product, models.Product.vendor_id == models.Vendor.id)
+        .join(models.Transaction, models.Transaction.product_id == models.Product.id)
         .group_by(models.Vendor.id, models.Vendor.name)
-        .order_by(desc(func.sum(models.Transaction.total_amount)))
+        .order_by(desc("revenue"))
         .first()
     )
 
-    if top_vendor_query and top_vendor_query.total_rev is not None:
+    top_vendor_data = None
+    if top_vendor_query:
         top_vendor_data = {
-            "name": top_vendor_query.vendor_name,
-            "revenue": round(float(top_vendor_query.total_rev), 2),
-            "orders": int(top_vendor_query.orders_count)
-        }
-    else:
-        # Fallback to first active vendor if no transactions yet
-        first_vendor = db.query(models.Vendor).filter(models.Vendor.role == "vendor", models.Vendor.status == "active").first()
-        top_vendor_data = {
-            "name": first_vendor.name if first_vendor else "Samsung",
-            "revenue": 0.0,
-            "orders": 0
+            "id": top_vendor_query.id,
+            "name": top_vendor_query.name,
+            "revenue": float(top_vendor_query.revenue),
+            "orders": int(top_vendor_query.orders)
         }
 
     return {
-        "total_revenue": round(total_revenue, 2),
-        "active_vendors": active_vendors,
-        "catalog_products": catalog_products,
-        "total_transactions": total_transactions,
+        "active_vendors": active_vendors_count,
+        "pending_vendors": pending_vendors_count,
+        "total_revenue": float(total_revenue),
         "top_vendor": top_vendor_data
     }
 
 
 @app.get("/activity-feed", response_model=list[schemas.ActivityLogResponse])
-def get_activity_feed(db: Session = Depends(get_db)):
+def get_activity_feed(limit: int = 15, db: Session = Depends(get_db)):
     """
-    Returns the 10 most recent system activity events.
+    LIVE ACTIVITY FEED ENDPOINT:
+    Returns the most recent system activity logs sorted by timestamp descending.
     """
-    return db.query(models.ActivityLog).order_by(desc(models.ActivityLog.timestamp)).limit(10).all()
+    logs = db.query(models.ActivityLog).order_by(models.ActivityLog.timestamp.desc()).limit(limit).all()
+    return logs
 
+
+# ==========================================
+# PUBLIC WEB PAGE ROUTES
+# ==========================================
 
 @app.get("/login-page")
 def serve_login_page():
@@ -168,6 +163,14 @@ def serve_vendor_dashboard():
     if os.path.exists(path):
         return FileResponse(path)
     return {"error": "vendor_dashboard.html file not found"}
+
+
+@app.get("/shopping-assistant")
+def serve_shopping_assistant():
+    path = os.path.join(os.path.dirname(__file__), "shopping_assistant.html")
+    if os.path.exists(path):
+        return FileResponse(path)
+    return {"error": "shopping_assistant.html file not found"}
 
 
 @app.get("/dashboard")

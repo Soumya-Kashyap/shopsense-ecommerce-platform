@@ -3,3 +3,4 @@ __pycache__/
 *.pyc
 shopsense.db
 .DS_Store
+.env
