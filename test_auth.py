@@ -1,8 +1,6 @@
 from fastapi.testclient import TestClient
+
 from main import app
-from database import SessionLocal, engine, Base
-import models
-from auth import hash_password
 
 client = TestClient(app)
 

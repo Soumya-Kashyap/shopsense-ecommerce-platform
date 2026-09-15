@@ -1,6 +1,7 @@
 from fastapi.testclient import TestClient
-from main import app
+
 from clear_products import clear_products_and_transactions
+from main import app
 
 client = TestClient(app)
 

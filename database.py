@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 # SQLite database file URL (shopsense.db will be saved in the root folder)
 SQLALCHEMY_DATABASE_URL = "sqlite:///./shopsense.db"

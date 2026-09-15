@@ -1,5 +1,6 @@
-import bcrypt
 import secrets
+
+import bcrypt
 
 
 def hash_password(password: str) -> str:

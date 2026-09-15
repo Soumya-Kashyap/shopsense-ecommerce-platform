@@ -1,15 +1,28 @@
 import os
-from fastapi import FastAPI, Depends
+
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from sqlalchemy import desc, func
 from sqlalchemy.orm import Session
-from sqlalchemy import func, desc
 
 import models
 import schemas
-from database import engine, get_db, SessionLocal
-from routers import vendors, products, inventory, customers, reviews, analytics, charts, reports, notifications, assistant, analyst
 from auth import hash_password
+from database import SessionLocal, engine, get_db
+from routers import (
+    analyst,
+    analytics,
+    assistant,
+    charts,
+    customers,
+    inventory,
+    notifications,
+    products,
+    reports,
+    reviews,
+    vendors,
+)
 
 # Create database tables automatically on startup if they do not exist
 models.Base.metadata.create_all(bind=engine)
@@ -42,11 +55,33 @@ def init_admin_user():
 # Run admin initialization
 init_admin_user()
 
-# Initialize FastAPI application
+# Initialize FastAPI application with comprehensive OpenAPI metadata
 app = FastAPI(
-    title="ShopSense API",
-    description="Multi-Vendor E-Commerce Analytics Platform with Auth & Activity Feed",
-    version="3.4.0"
+    title="ShopSense Multi-Vendor E-Commerce Platform API",
+    description="""
+# 🛍️ ShopSense Multi-Vendor E-Commerce Analytics Platform API
+
+Welcome to the **ShopSense REST & Real-Time API**. ShopSense is an enterprise-grade multi-vendor marketplace platform featuring:
+* 🔐 **Role-Based Authentication**: Secure login for System Administrators and Vendors.
+* 🏬 **Vendor Management**: Merchant onboarding, status controls (active/pending/suspended), and financial analytics.
+* 📦 **Product Catalog & AI Enrichment**: Dynamic vision categorization, SEO tagging, and restock management.
+* 📊 **Analytics & Benchmarking**: Marketplace baseline benchmarks, customer spend segmentation, and sales trend tracking.
+* 💬 **Sentiment Analysis**: Customer product review aggregation and sentiment score calculation.
+* ⚡ **Real-Time WebSockets**: Live broadcast of platform sales to administrative dashboards.
+* 🤖 **RAG AI Shopping Assistant**: Natural language product recommendations powered by Groq LLM.
+* 🧠 **AI Data Analyst**: Natural language Text-to-SQL business analytics for vendor merchants.
+* 📑 **Executive Reporting**: Dynamic PDF & CSV export capabilities for platform metrics.
+
+---
+### 🔗 Useful Links
+* **Web Login Portal**: `/login-page`
+* **Admin Control Dashboard**: `/admin-dashboard`
+* **Vendor Portal**: `/vendor-dashboard`
+* **AI Shopping Assistant**: `/shopping-assistant`
+    """,
+    version="4.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc"
 )
 
 # Enable CORS Middleware
@@ -72,7 +107,13 @@ app.include_router(assistant.router)
 app.include_router(analyst.router)
 
 
-@app.get("/")
+@app.get(
+    "/",
+    summary="API Root & Service Health Check",
+    description="Returns welcome status message, platform currency, and operational navigation endpoints.",
+    response_description="JSON dictionary containing service status and quick navigation URLs",
+    tags=["Platform Overview & UI Portals"]
+)
 def read_root():
     return {
         "message": "Welcome to ShopSense API: Multi-Vendor E-Commerce Analytics Platform",
@@ -82,15 +123,18 @@ def read_root():
         "vendor_dashboard_url": "http://127.0.0.1:8000/vendor-dashboard",
         "shopping_assistant_url": "http://127.0.0.1:8000/shopping-assistant",
         "currency": "INR (₹)",
-        "milestone": "Milestone 3 - RAG AI Assistant, WebSockets, Charts & Benchmarking"
+        "milestone": "Milestone 4 - Docker Packaging, Optimization & Testing"
     }
 
 
-@app.get("/stats")
+@app.get(
+    "/stats",
+    summary="Global Platform Overview & Top Vendor Metrics",
+    description="Calculates overall marketplace metrics including total platform revenue (₹ INR), active vendor count, pending approvals, and top vendor of the month.",
+    response_description="Key platform performance stat object",
+    tags=["Platform Overview & UI Portals"]
+)
 def get_global_stats(db: Session = Depends(get_db)):
-    """
-    Analytics Endpoint: Global platform metrics, revenue in ₹ INR, and Top Vendor of the Month.
-    """
     active_vendors_count = db.query(models.Vendor).filter(models.Vendor.status == "active", models.Vendor.role == "vendor").count()
     pending_vendors_count = db.query(models.Vendor).filter(models.Vendor.status == "pending", models.Vendor.role == "vendor").count()
 
@@ -127,12 +171,15 @@ def get_global_stats(db: Session = Depends(get_db)):
     }
 
 
-@app.get("/activity-feed", response_model=list[schemas.ActivityLogResponse])
+@app.get(
+    "/activity-feed",
+    response_model=list[schemas.ActivityLogResponse],
+    summary="Recent Platform Activity Stream",
+    description="Retrieves the most recent system activity logs (vendor approvals, sale events, restock events) sorted by timestamp descending.",
+    response_description="List of system activity log records",
+    tags=["Platform Overview & UI Portals"]
+)
 def get_activity_feed(limit: int = 15, db: Session = Depends(get_db)):
-    """
-    LIVE ACTIVITY FEED ENDPOINT:
-    Returns the most recent system activity logs sorted by timestamp descending.
-    """
     logs = db.query(models.ActivityLog).order_by(models.ActivityLog.timestamp.desc()).limit(limit).all()
     return logs
 
@@ -141,7 +188,13 @@ def get_activity_feed(limit: int = 15, db: Session = Depends(get_db)):
 # PUBLIC WEB PAGE ROUTES
 # ==========================================
 
-@app.get("/login-page")
+@app.get(
+    "/login-page",
+    summary="Serve Login Page HTML",
+    description="Serves the single unified login web portal for Administrators and Vendors.",
+    response_description="HTML document file response",
+    tags=["Platform Overview & UI Portals"]
+)
 def serve_login_page():
     path = os.path.join(os.path.dirname(__file__), "login.html")
     if os.path.exists(path):
@@ -149,7 +202,13 @@ def serve_login_page():
     return {"error": "login.html file not found"}
 
 
-@app.get("/admin-dashboard")
+@app.get(
+    "/admin-dashboard",
+    summary="Serve Admin Dashboard HTML",
+    description="Serves the administrative control dashboard web interface.",
+    response_description="HTML document file response",
+    tags=["Platform Overview & UI Portals"]
+)
 def serve_admin_dashboard():
     path = os.path.join(os.path.dirname(__file__), "admin_dashboard.html")
     if os.path.exists(path):
@@ -157,7 +216,13 @@ def serve_admin_dashboard():
     return {"error": "admin_dashboard.html file not found"}
 
 
-@app.get("/vendor-dashboard")
+@app.get(
+    "/vendor-dashboard",
+    summary="Serve Vendor Portal HTML",
+    description="Serves the merchant vendor dashboard portal web interface.",
+    response_description="HTML document file response",
+    tags=["Platform Overview & UI Portals"]
+)
 def serve_vendor_dashboard():
     path = os.path.join(os.path.dirname(__file__), "vendor_dashboard.html")
     if os.path.exists(path):
@@ -165,7 +230,13 @@ def serve_vendor_dashboard():
     return {"error": "vendor_dashboard.html file not found"}
 
 
-@app.get("/shopping-assistant")
+@app.get(
+    "/shopping-assistant",
+    summary="Serve AI Shopping Assistant HTML",
+    description="Serves the customer-facing AI Shopping Assistant chat web interface.",
+    response_description="HTML document file response",
+    tags=["Platform Overview & UI Portals"]
+)
 def serve_shopping_assistant():
     path = os.path.join(os.path.dirname(__file__), "shopping_assistant.html")
     if os.path.exists(path):
@@ -173,7 +244,13 @@ def serve_shopping_assistant():
     return {"error": "shopping_assistant.html file not found"}
 
 
-@app.get("/dashboard")
+@app.get(
+    "/dashboard",
+    summary="Serve Vendor Dashboard (Alias)",
+    description="Convenience route redirecting to the vendor dashboard interface.",
+    response_description="HTML document file response",
+    tags=["Platform Overview & UI Portals"]
+)
 def serve_dashboard():
     dashboard_path = os.path.join(os.path.dirname(__file__), "vendor_dashboard.html")
     if os.path.exists(dashboard_path):

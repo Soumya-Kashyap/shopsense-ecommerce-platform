@@ -1,23 +1,23 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+
 from websocket_manager import manager
 
 router = APIRouter(
-    tags=["WebSockets (Milestone 3)"]
+    tags=["Real-Time WebSockets"]
 )
 
 
 @router.websocket("/ws/notifications")
 async def websocket_notifications_endpoint(websocket: WebSocket):
     """
-    WebSocket endpoint at /ws/notifications:
-    - Accepts WebSocket connections from admin dashboards
-    - Maintains connection in active clients list
-    - Listens for messages or disconnect events
+    WebSocket Live Event Broadcast Channel:
+    - Accepts WebSocket connections from administrative dashboards.
+    - Tracks client connection lifecycle.
+    - Receives real-time sale transaction event broadcasts.
     """
     await manager.connect(websocket)
     try:
         while True:
-            # Keep connection open & handle incoming client messages if any
             _ = await websocket.receive_text()
     except WebSocketDisconnect:
         manager.disconnect(websocket)

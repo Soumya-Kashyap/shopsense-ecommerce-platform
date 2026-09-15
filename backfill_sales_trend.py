@@ -1,7 +1,8 @@
-from datetime import datetime, timezone, timedelta
 import random
-from database import SessionLocal
+from datetime import datetime, timedelta, timezone
+
 import models
+from database import SessionLocal
 
 
 def backfill_sales_data():

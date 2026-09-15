@@ -1,29 +1,28 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 from sqlalchemy import func
-from database import get_db
+from sqlalchemy.orm import Session
+
 import models
 import schemas
+from database import get_db
 
 router = APIRouter(
-    tags=["Customers"]
+    tags=["Customers & Segmentation"]
 )
 
 
-@router.get("/customers/segments", response_model=list[schemas.CustomerSegmentResponse])
+@router.get(
+    "/customers/segments",
+    response_model=list[schemas.CustomerSegmentResponse],
+    summary="Customer Spend Tier Segmentation",
+    description="Groups customers by total transaction spend in ₹ INR and classifies them into value segments: 'High Value' (>= ₹1,00,000), 'Medium Value' (₹25,000 - ₹99,999), or 'Low Value' (< ₹25,000).",
+    response_description="List of customers with spend stats and tier segment classifications"
+)
 def get_customer_segments(db: Session = Depends(get_db)):
-    """
-    Customer Segmentation Endpoint (Milestone 2):
-    Groups customers by total transaction spend and classifies them into:
-    - "High Value" (>= ₹1,00,000)
-    - "Medium Value" (₹25,000 - ₹99,999)
-    - "Low Value" (< ₹25,000)
-    """
     customers = db.query(models.Customer).all()
     results = []
 
     for c in customers:
-        # Sum total_amount and count orders for this customer
         stats = (
             db.query(
                 func.sum(models.Transaction.total_amount).label("total_spend"),
@@ -36,7 +35,6 @@ def get_customer_segments(db: Session = Depends(get_db)):
         spend = float(stats.total_spend) if stats and stats.total_spend else 0.0
         orders = int(stats.total_orders) if stats and stats.total_orders else 0
 
-        # Classification logic
         if spend >= 100000.0:
             segment_label = "High Value"
         elif spend >= 25000.0:
@@ -53,6 +51,5 @@ def get_customer_segments(db: Session = Depends(get_db)):
             "segment": segment_label
         })
 
-    # Sort customers by total spend descending
     results.sort(key=lambda x: x["total_spend"], reverse=True)
     return results

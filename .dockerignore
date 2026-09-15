@@ -1,0 +1,25 @@
+# Python virtual environments & build artifacts
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local databases & secret env files
+shopsense.db
+.env
+*.db
+
+# Git repository metadata
+.git/
+.gitignore
+
+# OS & Editor files
+.DS_Store
+.vscode/
+.idea/
+*.log

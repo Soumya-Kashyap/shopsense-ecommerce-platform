@@ -1,21 +1,23 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from database import get_db
+
 import models
 import schemas
+from database import get_db
 
 router = APIRouter(
-    tags=["Inventory"]
+    tags=["Inventory & Stock Intelligence"]
 )
 
 
-@router.get("/inventory/overview", response_model=list[schemas.InventoryItemResponse])
+@router.get(
+    "/inventory/overview",
+    response_model=list[schemas.InventoryItemResponse],
+    summary="Platform Inventory Overview",
+    description="Retrieves stock quantity, unit price (₹ INR), vendor identity, and calculated inventory status badge ('low_stock' if stock_qty < 10, else 'in_stock') for all marketplace products.",
+    response_description="List of inventory items with calculated stock status"
+)
 def get_inventory_overview(db: Session = Depends(get_db)):
-    """
-    Inventory Intelligence Endpoint (Milestone 2):
-    Returns product name, vendor name, stock quantity, price, and computed status ("low_stock" vs "in_stock")
-    for every product across all vendors.
-    """
     products = db.query(models.Product).join(models.Vendor, models.Product.vendor_id == models.Vendor.id).all()
     results = []
 
@@ -34,13 +36,14 @@ def get_inventory_overview(db: Session = Depends(get_db)):
     return results
 
 
-@router.get("/inventory/low-stock", response_model=list[schemas.InventoryItemResponse])
+@router.get(
+    "/inventory/low-stock",
+    response_model=list[schemas.InventoryItemResponse],
+    summary="Low Stock Inventory Alerts",
+    description="Filters marketplace catalog for items below critical restock threshold (stock_qty < 10 units) across all vendors.",
+    response_description="List of low-stock inventory items"
+)
 def get_low_stock_inventory(db: Session = Depends(get_db)):
-    """
-    Inventory Low Stock Endpoint (Milestone 2):
-    Returns only products currently below the low-stock threshold (stock_qty < 10) across all vendors
-    for admin-wide visibility.
-    """
     products = (
         db.query(models.Product)
         .join(models.Vendor, models.Product.vendor_id == models.Vendor.id)

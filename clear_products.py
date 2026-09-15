@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
-from database import SessionLocal, engine
+
 import models
+from database import SessionLocal
 
 
 def clear_products_and_transactions():

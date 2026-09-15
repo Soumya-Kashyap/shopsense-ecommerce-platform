@@ -1,21 +1,20 @@
 import os
 import re
-from typing import Optional
-from dotenv import load_dotenv
-from fastapi import APIRouter, Depends, status
-from sqlalchemy.orm import Session
-from sqlalchemy import func, desc, or_
 
-from database import get_db
+from dotenv import load_dotenv
+from fastapi import APIRouter, Depends
+from sqlalchemy import desc, func, or_
+from sqlalchemy.orm import Session
+
 import models
 import schemas
+from database import get_db
 
-# Load environment variables from .env if present
 load_dotenv()
 
 router = APIRouter(
     prefix="/assistant",
-    tags=["RAG AI Shopping Assistant (Milestone 3)"]
+    tags=["AI Shopping Assistant (RAG)"]
 )
 
 
@@ -25,8 +24,7 @@ def extract_search_signals(question: str):
     """
     q_lower = question.lower()
 
-    # Extract max price limit (e.g. "under 15000", "below 20000", "< 50000", "budget 30000")
-    max_price: Optional[float] = None
+    max_price: float | None = None
     price_match = re.search(r'(?:under|below|less than|budget|within|<|<=|₹)\s*(\d[\d,.]*)', q_lower)
     if price_match:
         try:
@@ -35,9 +33,8 @@ def extract_search_signals(question: str):
         except ValueError:
             max_price = None
 
-    # Common e-commerce product keywords mapping
     keywords = []
-    category_signal: Optional[str] = None
+    category_signal: str | None = None
 
     if any(w in q_lower for w in ["earbud", "earbuds", "headphone", "headphones", "sound", "speaker", "speakers", "audio"]):
         category_signal = "Audio"
@@ -55,7 +52,7 @@ def extract_search_signals(question: str):
     return max_price, category_signal, keywords
 
 
-def retrieve_matching_products(db: Session, max_price: Optional[float], category_signal: Optional[str], keywords: list[str], limit: int = 4):
+def retrieve_matching_products(db: Session, max_price: float | None, category_signal: str | None, keywords: list[str], limit: int = 4):
     """
     Retrieves real products from shopsense.db based on category/price filters, ordered by units sold.
     """
@@ -79,7 +76,6 @@ def retrieve_matching_products(db: Session, max_price: Optional[float], category
     if max_price is not None and max_price > 0:
         query = query.filter(models.Product.price <= max_price)
 
-    # Filter by keywords if present
     if keywords:
         or_conditions = []
         for kw in keywords:
@@ -108,24 +104,20 @@ def retrieve_matching_products(db: Session, max_price: Optional[float], category
 
 
 def get_top_selling_fallback_products(db: Session, limit: int = 3):
-    """
-    Fallback retriever when no exact criteria match is found.
-    """
     return retrieve_matching_products(db, max_price=None, category_signal=None, keywords=[], limit=limit)
 
 
-@router.post("/ask", response_model=schemas.AssistantAnswerResponse)
+@router.post(
+    "/ask",
+    response_model=schemas.AssistantAnswerResponse,
+    summary="Ask AI Shopping Assistant (RAG)",
+    description="Retrieval-Augmented Generation (RAG) shopping assistant endpoint. Extracts search signals from natural language queries, retrieves matching database products, and prompts Groq LLM (llama-3.1-8b-instant) to generate grounded recommendations.",
+    response_description="Assistant response text payload with list of retrieved real product cards"
+)
 def ask_ai_shopping_assistant(payload: schemas.AssistantQuestionRequest, db: Session = Depends(get_db)):
-    """
-    POST /assistant/ask (Milestone 3 RAG Feature):
-    1. RETRIEVAL: Parses user question for price/category signals & queries shopsense.db for real products.
-    2. GENERATION: Calls Groq LLM (llama-3.1-8b-instant) with strictly grounded system instructions.
-    3. FALLBACK: Gracefully handles empty matches or API failures with top-selling recommendations.
-    """
     question_text = payload.question.strip()
     max_price, category_signal, keywords = extract_search_signals(question_text)
 
-    # Retrieval Step
     matched_raw = retrieve_matching_products(db, max_price, category_signal, keywords)
     fallback_used = False
 
@@ -133,7 +125,6 @@ def ask_ai_shopping_assistant(payload: schemas.AssistantQuestionRequest, db: Ses
         matched_raw = get_top_selling_fallback_products(db, limit=3)
         fallback_used = True
 
-    # Format matched products for response payload
     matched_products_formatted = []
     for item in matched_raw:
         matched_products_formatted.append({
@@ -147,7 +138,6 @@ def ask_ai_shopping_assistant(payload: schemas.AssistantQuestionRequest, db: Ses
             "total_revenue": round(float(item.total_revenue), 2)
         })
 
-    # Prepare Groq LLM Generation Step
     groq_api_key = os.getenv("GROQ_API_KEY")
 
     if fallback_used:
@@ -161,7 +151,6 @@ def ask_ai_shopping_assistant(payload: schemas.AssistantQuestionRequest, db: Ses
             "fallback_used": True
         }
 
-    # Build Grounded Context String for LLM
     context_items = []
     for idx, p in enumerate(matched_raw, start=1):
         context_items.append(
@@ -210,11 +199,10 @@ def ask_ai_shopping_assistant(payload: schemas.AssistantQuestionRequest, db: Ses
             print(f"Groq API call warning: {err}")
             llm_answer = ""
 
-    # Graceful Fallback if Groq call failed or returned empty
     if not llm_answer:
         p_names = [f"'{p['product_name']}' (₹{p['price']:,.2f})" for p in matched_products_formatted]
         llm_answer = (
-            f"Here are the top-rated recommendations matching your request on ShopSense: "
+            "Here are the top-rated recommendations matching your request on ShopSense: "
             + ", ".join(p_names) + ". Check out the product cards below for details!"
         )
 

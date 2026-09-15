@@ -1,4 +1,5 @@
 from fastapi.testclient import TestClient
+
 from main import app
 
 client = TestClient(app)
@@ -166,7 +167,7 @@ def run_full_suite_verification():
         assert not any(p["product_id"] == t_id for p in new_low_items), f"Product #{t_id} still listed in low-stock after restock!"
 
         print(f"  ✓ Restocked Product #{t_id} '{target['product_name']}' from {initial_stock} -> {expected_new_stock} units.")
-        print(f"  ✓ Verified product clears 'Low Stock' flag after restocking above 10 units.")
+        print("  ✓ Verified product clears 'Low Stock' flag after restocking above 10 units.")
         results_summary.append(("CHECK 5: POST /products/{id}/restock", "PASS"))
     except Exception as e:
         print(f"  ❌ CHECK 5 FAILED: {e}")
@@ -206,7 +207,7 @@ def run_full_suite_verification():
         assert client.get("/charts/customer-segment-distribution").status_code == 200
         assert client.get("/charts/category-sales-breakdown").status_code == 200
 
-        print(f"  ✓ All 4 /charts/* endpoints verified.")
+        print("  ✓ All 4 /charts/* endpoints verified.")
         results_summary.append(("CHECK 7: /charts/* Endpoints", "PASS"))
     except Exception as e:
         print(f"  ❌ CHECK 7 FAILED: {e}")
@@ -222,7 +223,7 @@ def run_full_suite_verification():
         assert bm_res.status_code == 200
         bm_data = bm_res.json()
         assert "marketplace_averages" in bm_data and "vendors" in bm_data
-        print(f"  ✓ GET /analytics/benchmarks verified.")
+        print("  ✓ GET /analytics/benchmarks verified.")
         results_summary.append(("CHECK 8: GET /analytics/benchmarks", "PASS"))
     except Exception as e:
         print(f"  ❌ CHECK 8 FAILED: {e}")
@@ -238,7 +239,7 @@ def run_full_suite_verification():
         assert r1.status_code == 200
         r2 = client.get("/products/1/export/sales-csv")
         assert r2.status_code == 200
-        print(f"  ✓ CSV Export endpoints (/reports/export/vendors-csv & /products/1/export/sales-csv) verified.")
+        print("  ✓ CSV Export endpoints (/reports/export/vendors-csv & /products/1/export/sales-csv) verified.")
         results_summary.append(("CHECK 9: CSV Export Endpoints", "PASS"))
     except Exception as e:
         print(f"  ❌ CHECK 9 FAILED: {e}")
@@ -279,7 +280,7 @@ def run_full_suite_verification():
         first_p = res_data["matched_products"][0]
         assert first_p["price"] <= 15000.0
 
-        print(f"  ✓ POST /assistant/ask verified!")
+        print("  ✓ POST /assistant/ask verified!")
         print(f"  ✓ LLM Response Generated ({len(res_data['answer'])} chars): \"{res_data['answer'][:120]}...\"")
         print(f"  ✓ Matched Real Products: {len(res_data['matched_products'])} item(s).")
         results_summary.append(("CHECK 11: RAG AI Shopping Assistant", "PASS"))
@@ -302,7 +303,7 @@ def run_full_suite_verification():
         assert analyst_data["query_success"] is True
         assert "SELECT" in analyst_data["sql_query"].upper() or "WITH" in analyst_data["sql_query"].upper()
 
-        print(f"  ✓ POST /vendor/1/ai-analyst verified!")
+        print("  ✓ POST /vendor/1/ai-analyst verified!")
         print(f"  ✓ Text-to-SQL Query Generated: {analyst_data['sql_query']}")
         print(f"  ✓ Natural Language Answer: \"{analyst_data['answer'][:120]}...\"")
         results_summary.append(("CHECK 12: AI Data Analyst (Text-to-SQL)", "PASS"))
@@ -321,7 +322,7 @@ def run_full_suite_verification():
         assert pdf_res.headers.get("content-type") == "application/pdf"
         assert pdf_res.content.startswith(b"%PDF-"), "Downloaded file does not start with valid PDF magic bytes %PDF-"
 
-        print(f"  ✓ GET /reports/export/vendors-pdf verified!")
+        print("  ✓ GET /reports/export/vendors-pdf verified!")
         print(f"  ✓ Valid PDF document generated ({len(pdf_res.content)} bytes, Content-Type: application/pdf).")
         results_summary.append(("CHECK 13: PDF Report Export", "PASS"))
     except Exception as e:

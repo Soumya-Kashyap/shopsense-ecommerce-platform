@@ -1,17 +1,17 @@
-from datetime import datetime, timezone
 import re
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from database import get_db
 import models
 import schemas
+from database import get_db
 
 router = APIRouter(
-    tags=["Reviews & Sentiment"]
+    tags=["Product Reviews & Sentiment Analysis"]
 )
 
-# Sentiment Dictionaries
 POSITIVE_KEYWORDS = {
     "great", "excellent", "love", "loved", "amazing", "outstanding", "best", "perfect",
     "good", "superb", "fast", "easy", "durable", "stunning", "impressed", "worth",
@@ -54,7 +54,6 @@ def analyze_review_sentiment(review_text: str):
     else:
         label = "Neutral"
 
-    # Extract pros/cons based on matched keywords and simple clause parsing
     clauses = re.split(r'[,.!\n;]+', review_text)
     pros_list = []
     cons_list = []
@@ -84,13 +83,15 @@ def analyze_review_sentiment(review_text: str):
     return score, label, pros_str, cons_str
 
 
-@router.post("/products/{product_id}/reviews", response_model=schemas.ReviewResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/products/{product_id}/reviews",
+    response_model=schemas.ReviewResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Submit Product Customer Review",
+    description="Submits a customer product review, computes sentiment score (-1.0 to +1.0), extracts pros/cons, and logs an activity stream entry.",
+    response_description="Created review object containing computed sentiment classification"
+)
 def create_product_review(product_id: int, review: schemas.ReviewCreate, db: Session = Depends(get_db)):
-    """
-    POST /products/{product_id}/reviews:
-    Creates a new customer review, analyzes sentiment text, extracts pros/cons,
-    and logs an activity log event.
-    """
     product = db.query(models.Product).filter(models.Product.id == product_id).first()
     if not product:
         raise HTTPException(
@@ -113,11 +114,10 @@ def create_product_review(product_id: int, review: schemas.ReviewCreate, db: Ses
     )
     db.add(db_review)
 
-    # Activity Log
     vendor_name = product.vendor.name if product.vendor else "Vendor"
     log_entry = models.ActivityLog(
         event_type="review_added",
-        description=f"Review posted for '{product.name}' by {review.customer_name} (Rating: {review.rating}★, Sentiment: {label}).",
+        description=f"Review posted for {vendor_name}'s '{product.name}' by {review.customer_name} (Rating: {review.rating}★, Sentiment: {label}).",
         timestamp=datetime.now(timezone.utc)
     )
     db.add(log_entry)
@@ -127,15 +127,14 @@ def create_product_review(product_id: int, review: schemas.ReviewCreate, db: Ses
     return db_review
 
 
-@router.get("/products/{product_id}/reviews", response_model=schemas.ProductReviewsResponse)
+@router.get(
+    "/products/{product_id}/reviews",
+    response_model=schemas.ProductReviewsResponse,
+    summary="Get Product Reviews & Sentiment Breakdown",
+    description="Retrieves all customer reviews for a product along with aggregate metrics: average star rating, % positive/neutral/negative, and top pros/cons.",
+    response_description="Product reviews payload with aggregate sentiment metrics"
+)
 def get_product_reviews(product_id: int, db: Session = Depends(get_db)):
-    """
-    GET /products/{product_id}/reviews:
-    Returns all customer reviews for a product plus aggregate sentiment metrics:
-    - Average rating
-    - % Positive, % Neutral, % Negative
-    - Top Pros and Cons summary
-    """
     product = db.query(models.Product).filter(models.Product.id == product_id).first()
     if not product:
         raise HTTPException(
@@ -175,7 +174,6 @@ def get_product_reviews(product_id: int, db: Session = Depends(get_db)):
     neu_pct = round((neu_count / total_reviews) * 100, 1)
     neg_pct = round((neg_count / total_reviews) * 100, 1)
 
-    # Collect combined top pros/cons across reviews
     all_pros = [r.pros for r in reviews if r.pros and r.pros != "Great overall experience"]
     all_cons = [r.cons for r in reviews if r.cons and r.cons != "None reported"]
 

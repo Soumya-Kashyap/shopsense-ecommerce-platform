@@ -1,38 +1,38 @@
 import csv
 import io
 from datetime import datetime, timezone
-from fastapi import APIRouter, Depends, Response
-from sqlalchemy.orm import Session
-from sqlalchemy import func
 
-from database import get_db
-import models
+from fastapi import APIRouter, Depends, Response
+from reportlab.lib import colors
 
 # ReportLab imports for PDF generation
 from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib import colors
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+from sqlalchemy import func
+from sqlalchemy.orm import Session
+
+import models
+from database import get_db
 
 router = APIRouter(
     prefix="/reports",
-    tags=["Reports & Exports (Milestone 3)"]
+    tags=["Executive Reports & PDF/CSV Exports"]
 )
 
 
-@router.get("/export/vendors-csv")
+@router.get(
+    "/export/vendors-csv",
+    summary="Export Platform Vendors CSV Report",
+    description="Generates a downloadable CSV report containing all vendor accounts (ID, Name, Email, Status, Orders, Units Sold, Total Revenue in ₹ INR).",
+    response_description="CSV spreadsheet file attachment response ('shopsense_vendor_report.csv')"
+)
 def export_vendors_csv_report(db: Session = Depends(get_db)):
-    """
-    GET /reports/export/vendors-csv:
-    Generates a downloadable CSV containing all vendors' data:
-    Vendor Name, Email, Status, Total Revenue, Total Orders, Units Sold.
-    """
     vendors = db.query(models.Vendor).filter(models.Vendor.role == "vendor").all()
 
     output = io.StringIO()
     writer = csv.writer(output)
 
-    # Write CSV Header
     writer.writerow([
         "Vendor ID",
         "Vendor Name",
@@ -80,18 +80,15 @@ def export_vendors_csv_report(db: Session = Depends(get_db)):
     )
 
 
-@router.get("/export/vendors-pdf")
+@router.get(
+    "/export/vendors-pdf",
+    summary="Export Executive Platform Performance PDF Report",
+    description="Generates a formatted executive PDF report containing a header title, generation timestamp, platform executive KPI summary (Total Revenue in ₹ INR, Active Merchants, Total Orders), and a clean vendor financial performance directory table.",
+    response_description="PDF document file attachment response ('shopsense_platform_report.pdf')"
+)
 def export_vendors_pdf_report(db: Session = Depends(get_db)):
-    """
-    GET /reports/export/vendors-pdf:
-    Generates a properly formatted PDF report containing:
-    - Header with 'ShopSense - Platform Performance Report' and generation timestamp
-    - Summary section with total platform revenue, active vendor count, total orders
-    - Clean table listing all vendors: name, email, status, total revenue, orders, units sold
-    """
     vendors = db.query(models.Vendor).filter(models.Vendor.role == "vendor").all()
 
-    # Calculate global platform summary metrics
     total_platform_revenue = db.query(func.sum(models.Transaction.total_amount)).scalar() or 0.0
     active_vendors_count = db.query(models.Vendor).filter(models.Vendor.role == "vendor", models.Vendor.status == "active").count()
     total_orders_count = db.query(models.Transaction).count()
@@ -108,7 +105,6 @@ def export_vendors_pdf_report(db: Session = Depends(get_db)):
 
     styles = getSampleStyleSheet()
 
-    # Custom styles
     title_style = ParagraphStyle(
         'DocTitle',
         parent=styles['Heading1'],
@@ -169,12 +165,10 @@ def export_vendors_pdf_report(db: Session = Depends(get_db)):
 
     story = []
 
-    # Title & Header Banner
     generation_time = datetime.now(timezone.utc).strftime("%B %d, %Y - %H:%M UTC")
     story.append(Paragraph("ShopSense — Platform Performance Report", title_style))
     story.append(Paragraph(f"Generated on {generation_time} | Platform Administration", subtitle_style))
 
-    # Executive Summary Box Table
     summary_data = [
         [
             Paragraph("Total Platform Revenue (INR)", cell_bold_style),
@@ -198,7 +192,6 @@ def export_vendors_pdf_report(db: Session = Depends(get_db)):
     story.append(summary_table)
     story.append(Spacer(1, 14))
 
-    # Vendor Directory & Performance Section
     story.append(Paragraph("Vendor Directory & Financial Performance Breakdown", section_heading_style))
 
     table_data = [
@@ -253,7 +246,6 @@ def export_vendors_pdf_report(db: Session = Depends(get_db)):
 
     story.append(pdf_table)
 
-    # Build PDF
     doc.build(story)
     pdf_bytes = pdf_buffer.getvalue()
 

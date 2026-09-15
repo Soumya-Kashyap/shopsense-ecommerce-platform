@@ -1,22 +1,25 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
 from sqlalchemy import func
+from sqlalchemy.orm import Session
 
-from database import get_db
 import models
 import schemas
 from auth import hash_password, verify_password
+from database import get_db
 
 router = APIRouter(
-    tags=["Vendors"]
+    tags=["Vendors & Merchants"]
 )
 
 
-@router.post("/login", response_model=schemas.LoginResponse)
+@router.post(
+    "/login",
+    response_model=schemas.LoginResponse,
+    summary="Authenticate User or Vendor",
+    description="Authenticates System Administrator or Vendor credentials via bcrypt verification and returns authorization session token.",
+    response_description="User identity, role, vendor ID, and authorization session token"
+)
 def login(credentials: schemas.LoginRequest, db: Session = Depends(get_db)):
-    """
-    Authenticate vendor or admin users using bcrypt verification.
-    """
     user = db.query(models.Vendor).filter(models.Vendor.email == credentials.email).first()
     if not user or not user.password_hash or not verify_password(credentials.password, user.password_hash):
         raise HTTPException(
@@ -42,7 +45,14 @@ def login(credentials: schemas.LoginRequest, db: Session = Depends(get_db)):
     }
 
 
-@router.post("/vendors/register", response_model=schemas.VendorResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/vendors/register",
+    response_model=schemas.VendorResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Register New Merchant Vendor",
+    description="Registers a new merchant vendor account with status initialized to 'pending' for administrative approval.",
+    response_description="Newly created vendor record object"
+)
 def register_vendor(vendor: schemas.VendorCreate, db: Session = Depends(get_db)):
     existing_vendor = db.query(models.Vendor).filter(models.Vendor.email == vendor.email).first()
     if existing_vendor:
@@ -72,16 +82,24 @@ def register_vendor(vendor: schemas.VendorCreate, db: Session = Depends(get_db))
     return db_vendor
 
 
-@router.get("/vendors/", response_model=list[schemas.VendorResponse])
+@router.get(
+    "/vendors/",
+    response_model=list[schemas.VendorResponse],
+    summary="List All Vendors",
+    description="Retrieves a complete list of all registered merchant vendors.",
+    response_description="List of vendor record objects"
+)
 def list_vendors(db: Session = Depends(get_db)):
     return db.query(models.Vendor).all()
 
 
-@router.get("/vendors/revenue-summary")
+@router.get(
+    "/vendors/revenue-summary",
+    summary="Per-Vendor Revenue & Order Breakdown",
+    description="Calculates gross revenue (₹ INR), order counts, and total units sold for every registered vendor merchant.",
+    response_description="List of per-vendor sales summary statistics"
+)
 def get_per_vendor_revenue(db: Session = Depends(get_db)):
-    """
-    Analytics Endpoint: Returns per-vendor financial breakdown (orders, units, revenue in ₹ INR).
-    """
     vendors = db.query(models.Vendor).filter(models.Vendor.role == "vendor").all()
     summary = []
 
@@ -114,7 +132,13 @@ def get_per_vendor_revenue(db: Session = Depends(get_db)):
     return summary
 
 
-@router.get("/vendors/{vendor_id}", response_model=schemas.VendorResponse)
+@router.get(
+    "/vendors/{vendor_id}",
+    response_model=schemas.VendorResponse,
+    summary="Get Vendor Details by ID",
+    description="Retrieves profile and account status information for a specific vendor ID.",
+    response_description="Vendor profile record object"
+)
 def get_vendor(vendor_id: int, db: Session = Depends(get_db)):
     vendor = db.query(models.Vendor).filter(models.Vendor.id == vendor_id).first()
     if not vendor:
@@ -125,7 +149,13 @@ def get_vendor(vendor_id: int, db: Session = Depends(get_db)):
     return vendor
 
 
-@router.put("/vendors/{vendor_id}", response_model=schemas.VendorResponse)
+@router.put(
+    "/vendors/{vendor_id}",
+    response_model=schemas.VendorResponse,
+    summary="Update Vendor Profile Details",
+    description="Updates name, email, or contact information for an existing vendor.",
+    response_description="Updated vendor record object"
+)
 def update_vendor(vendor_id: int, vendor_data: schemas.VendorUpdate, db: Session = Depends(get_db)):
     vendor = db.query(models.Vendor).filter(models.Vendor.id == vendor_id).first()
     if not vendor:
@@ -151,7 +181,13 @@ def update_vendor(vendor_id: int, vendor_data: schemas.VendorUpdate, db: Session
     return vendor
 
 
-@router.put("/vendors/{vendor_id}/status", response_model=schemas.VendorResponse)
+@router.put(
+    "/vendors/{vendor_id}/status",
+    response_model=schemas.VendorResponse,
+    summary="Update Vendor Account Approval Status",
+    description="Admin control endpoint to set vendor status to 'active', 'pending', or 'suspended'. Logs activity stream event.",
+    response_description="Vendor object with updated status"
+)
 def update_vendor_status(vendor_id: int, status_data: schemas.VendorStatusUpdate, db: Session = Depends(get_db)):
     vendor = db.query(models.Vendor).filter(models.Vendor.id == vendor_id).first()
     if not vendor:
@@ -175,7 +211,13 @@ def update_vendor_status(vendor_id: int, status_data: schemas.VendorStatusUpdate
     return vendor
 
 
-@router.get("/vendors/{vendor_id}/sales", response_model=schemas.VendorSalesSummary)
+@router.get(
+    "/vendors/{vendor_id}/sales",
+    response_model=schemas.VendorSalesSummary,
+    summary="Get Specific Vendor Sales Metrics",
+    description="Returns aggregate sales performance metrics (total orders, total units sold, total revenue) for a single vendor.",
+    response_description="Vendor sales summary metrics object"
+)
 def get_vendor_sales_summary(vendor_id: int, db: Session = Depends(get_db)):
     vendor = db.query(models.Vendor).filter(models.Vendor.id == vendor_id).first()
     if not vendor:

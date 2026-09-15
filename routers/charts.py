@@ -1,26 +1,27 @@
-from datetime import datetime, timezone, timedelta
-from typing import Optional
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
-from sqlalchemy import func, desc
+from datetime import datetime, timedelta, timezone
 
-from database import get_db
+from fastapi import APIRouter, Depends
+from sqlalchemy import desc, func
+from sqlalchemy.orm import Session
+
 import models
 import schemas
+from database import get_db
 
 router = APIRouter(
     prefix="/charts",
-    tags=["Chart-Ready Analytics (Milestone 3)"]
+    tags=["Visual Charts & Graph Data"]
 )
 
 
-@router.get("/revenue-by-vendor", response_model=list[schemas.ChartItemResponse])
+@router.get(
+    "/revenue-by-vendor",
+    response_model=list[schemas.ChartItemResponse],
+    summary="Chart Data: Revenue by Vendor",
+    description="Returns each merchant vendor's total revenue formatted as pre-processed {label, value} objects sorted descending for bar chart rendering.",
+    response_description="Array of chart item objects for vendor revenue bar chart"
+)
 def get_chart_revenue_by_vendor(db: Session = Depends(get_db)):
-    """
-    1. GET /charts/revenue-by-vendor:
-    Returns each vendor's name and total revenue, sorted descending.
-    Format: [{"label": "Samsung", "value": 388996.00}, ...]
-    """
     query = (
         db.query(
             models.Vendor.name.label("vendor_name"),
@@ -44,20 +45,21 @@ def get_chart_revenue_by_vendor(db: Session = Depends(get_db)):
     return results
 
 
-@router.get("/daily-orders-trend", response_model=list[schemas.ChartItemResponse])
+@router.get(
+    "/daily-orders-trend",
+    response_model=list[schemas.ChartItemResponse],
+    summary="Chart Data: 7-Day Order Volume Trend",
+    description="Returns order counts per day for the last 7 days formatted as {label, value} objects for trendline chart rendering.",
+    response_description="Array of chart item objects for daily order trend graph"
+)
 def get_chart_daily_orders_trend(db: Session = Depends(get_db)):
-    """
-    2. GET /charts/daily-orders-trend:
-    Returns order count per day for the last 7 days.
-    Format: [{"label": "Mon 08-18", "value": 5}, ...]
-    """
     now_utc = datetime.now(timezone.utc)
     days_list = [now_utc - timedelta(days=i) for i in range(6, -1, -1)]
 
     results = []
     for d in days_list:
         date_str = d.strftime("%Y-%m-%d")
-        lbl = d.strftime("%a %m-%d")  # e.g. "Mon 08-18"
+        lbl = d.strftime("%a %m-%d")
 
         stats = (
             db.query(func.coalesce(func.count(models.Transaction.id), 0).label("orders"))
@@ -74,17 +76,14 @@ def get_chart_daily_orders_trend(db: Session = Depends(get_db)):
     return results
 
 
-@router.get("/customer-segment-distribution", response_model=list[schemas.ChartItemResponse])
+@router.get(
+    "/customer-segment-distribution",
+    response_model=list[schemas.ChartItemResponse],
+    summary="Chart Data: Customer Segment Share",
+    description="Returns customer counts per spend tier (High, Medium, Low Value) formatted with UI hex color codes for donut/pie chart rendering.",
+    response_description="Array of chart item objects with associated hex color strings"
+)
 def get_chart_customer_segment_distribution(db: Session = Depends(get_db)):
-    """
-    3. GET /charts/customer-segment-distribution:
-    Returns count of customers in each segment (High/Medium/Low Value) with badge colors.
-    Format: [
-      {"label": "High Value", "value": 3, "color": "#facc15"},
-      {"label": "Medium Value", "value": 2, "color": "#60a5fa"},
-      {"label": "Low Value", "value": 1, "color": "#94a3b8"}
-    ]
-    """
     customers = db.query(models.Customer).all()
 
     high_count = 0
@@ -112,13 +111,14 @@ def get_chart_customer_segment_distribution(db: Session = Depends(get_db)):
     ]
 
 
-@router.get("/category-sales-breakdown", response_model=list[schemas.ChartItemResponse])
+@router.get(
+    "/category-sales-breakdown",
+    response_model=list[schemas.ChartItemResponse],
+    summary="Chart Data: Revenue by Product Category",
+    description="Returns total sales revenue grouped by product category classification formatted as {label, value} objects sorted descending.",
+    response_description="Array of chart item objects for category revenue breakdown chart"
+)
 def get_chart_category_sales_breakdown(db: Session = Depends(get_db)):
-    """
-    4. GET /charts/category-sales-breakdown:
-    Returns total revenue per product category (based on VISION category field).
-    Format: [{"label": "Electronics", "value": 150000.00}, ...]
-    """
     query = (
         db.query(
             models.Product.category.label("raw_cat"),
@@ -130,7 +130,6 @@ def get_chart_category_sales_breakdown(db: Session = Depends(get_db)):
         .all()
     )
 
-    # Group by clean category name
     cat_map = {}
     for r in query:
         raw_cat = r.raw_cat or "Electronics"
@@ -145,6 +144,5 @@ def get_chart_category_sales_breakdown(db: Session = Depends(get_db)):
             "value": round(rev_val, 2)
         })
 
-    # Sort descending by value
     results.sort(key=lambda x: x["value"], reverse=True)
     return results

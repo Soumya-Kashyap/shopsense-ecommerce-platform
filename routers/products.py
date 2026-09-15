@@ -1,27 +1,31 @@
+import asyncio
 import csv
 import io
-import asyncio
 from datetime import datetime, timezone
-from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Response
-from sqlalchemy.orm import Session
-from sqlalchemy import func, desc
 
-from database import get_db
+from fastapi import APIRouter, Depends, HTTPException, Response, status
+from sqlalchemy import desc, func
+from sqlalchemy.orm import Session
+
 import models
 import schemas
+from database import get_db
 from websocket_manager import manager
 
 router = APIRouter(
-    tags=["Products"]
+    tags=["Products & Catalog"]
 )
 
 
-@router.post("/products", response_model=schemas.ProductResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/products",
+    response_model=schemas.ProductResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create & Enrich New Product",
+    description="Creates a new catalog product linked to a specific vendor ID. Includes vision-based category classification, automated SEO tags, and stock initialization.",
+    response_description="Newly created product object"
+)
 def create_product(product: schemas.ProductCreate, db: Session = Depends(get_db)):
-    """
-    Create a new product linked to a specific vendor, including AI category and tags.
-    """
     vendor = db.query(models.Vendor).filter(models.Vendor.id == product.vendor_id).first()
     if not vendor:
         raise HTTPException(
@@ -53,17 +57,18 @@ def create_product(product: schemas.ProductCreate, db: Session = Depends(get_db)
     return db_product
 
 
-@router.get("/products/top-selling", response_model=list[schemas.TopSellingProductResponse])
+@router.get(
+    "/products/top-selling",
+    response_model=list[schemas.TopSellingProductResponse],
+    summary="Top-Selling Product Recommendations",
+    description="Returns top-selling products ranked descending by total units sold across completed transactions. Supports optional category filtering.",
+    response_description="List of top-selling products sorted by units sold"
+)
 def get_top_selling_products(
-    category: Optional[str] = None,
+    category: str | None = None,
     limit: int = 5,
     db: Session = Depends(get_db)
 ):
-    """
-    Rule-Based Product Recommendations Endpoint (Milestone 2):
-    Returns top-selling products ranked by total units sold across completed transactions.
-    Supports optional category filtering.
-    """
     query = (
         db.query(
             models.Product.id.label("product_id"),
@@ -113,15 +118,13 @@ def get_top_selling_products(
     return results
 
 
-@router.post("/products/{product_id}/simulate-sale")
+@router.post(
+    "/products/{product_id}/simulate-sale",
+    summary="Simulate Product Sale Transaction",
+    description="Simulates a purchase transaction for 1 unit of a product: decrements stock quantity by 1, logs transaction record, updates system activity feed, and broadcasts a real-time WebSocket notification payload to connected dashboards.",
+    response_description="Transaction summary confirmation dictionary"
+)
 def simulate_product_sale(product_id: int, db: Session = Depends(get_db)):
-    """
-    FEATURE: Records a transaction for 1 unit of this product.
-    - Decrements stock_qty by 1.
-    - Creates a Transaction record.
-    - Logs a live ActivityLog event.
-    - Broadcasts real-time WebSocket sale notification to connected admin dashboards.
-    """
     product = db.query(models.Product).filter(models.Product.id == product_id).first()
     if not product:
         raise HTTPException(
@@ -164,7 +167,6 @@ def simulate_product_sale(product_id: int, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(product)
 
-    # Broadcast WebSocket notification payload to all connected admin dashboards
     notification_payload = {
         "event": "new_sale",
         "vendor_name": vendor_name,
@@ -189,16 +191,18 @@ def simulate_product_sale(product_id: int, db: Session = Depends(get_db)):
     }
 
 
-@router.post("/products/{product_id}/restock", response_model=schemas.RestockResponse)
+@router.post(
+    "/products/{product_id}/restock",
+    response_model=schemas.RestockResponse,
+    summary="Restock Product Inventory",
+    description="Adds specified quantity to product's current stock_qty, logs an activity stream entry, and updates low-stock status badges.",
+    response_description="Restock event response details with updated inventory level"
+)
 def restock_product_inventory(
     product_id: int,
     restock: schemas.RestockRequest,
     db: Session = Depends(get_db)
 ):
-    """
-    RESTOCK INVENTORY FEATURE (Milestone 2):
-    Adds specified quantity to product's stock_qty and logs an ActivityLog entry.
-    """
     product = db.query(models.Product).filter(models.Product.id == product_id).first()
     if not product:
         raise HTTPException(
@@ -228,13 +232,13 @@ def restock_product_inventory(
     }
 
 
-@router.get("/products/{vendor_id}/export/sales-csv")
+@router.get(
+    "/products/{vendor_id}/export/sales-csv",
+    summary="Export Vendor Product Sales CSV",
+    description="Generates a downloadable CSV report containing a specific vendor's product sales performance data (title, category, price in ₹ INR, current stock, units sold, total revenue).",
+    response_description="CSV spreadsheet file attachment response"
+)
 def export_vendor_product_sales_csv(vendor_id: int, db: Session = Depends(get_db)):
-    """
-    GET /products/{vendor_id}/export/sales-csv:
-    Generates a CSV file containing a specific vendor's own product sales data:
-    Product Name, Category, Price (INR), Stock, Units Sold, Revenue Generated.
-    """
     vendor = db.query(models.Vendor).filter(models.Vendor.id == vendor_id).first()
     if not vendor:
         raise HTTPException(
@@ -247,7 +251,6 @@ def export_vendor_product_sales_csv(vendor_id: int, db: Session = Depends(get_db
     output = io.StringIO()
     writer = csv.writer(output)
 
-    # Header
     writer.writerow([
         "Product ID",
         "Product Name",
@@ -293,11 +296,14 @@ def export_vendor_product_sales_csv(vendor_id: int, db: Session = Depends(get_db
     )
 
 
-@router.get("/vendors/{vendor_id}/products", response_model=list[schemas.ProductResponse])
+@router.get(
+    "/vendors/{vendor_id}/products",
+    response_model=list[schemas.ProductResponse],
+    summary="List Vendor Catalog Products",
+    description="Retrieves all product catalog items listed by a specific vendor ID.",
+    response_description="List of product objects belonging to the specified vendor"
+)
 def get_vendor_products(vendor_id: int, db: Session = Depends(get_db)):
-    """
-    Retrieve all products listed by a specific vendor.
-    """
     vendor = db.query(models.Vendor).filter(models.Vendor.id == vendor_id).first()
     if not vendor:
         raise HTTPException(

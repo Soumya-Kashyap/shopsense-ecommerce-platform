@@ -1,4 +1,6 @@
 
+[![ShopSense CI/CD Pipeline](https://github.com/Soumya-Kashyap/shopsense-ecommerce-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/Soumya-Kashyap/shopsense-ecommerce-platform/actions/workflows/ci.yml)
+
 # ShopSense — Multi-Vendor E-Commerce Analytics Platform
 
 A full-stack multi-vendor marketplace platform with role-based authentication, vendor management, and AI-simulated product enrichment — built as part of the Infosys Springboard internship program.
@@ -113,6 +115,28 @@ uvicorn main:app --reload
 |------|-------|----------|
 | Admin | admin@shopsense.com | admin |
 | Vendor (Samsung) | contact@samsung.com | vendor123 |
+
+## 🐳 Running with Docker
+
+You can package and run ShopSense inside a Docker container without needing local Python installation setup.
+
+### 1. Build the Docker Image
+```bash
+docker build -t shopsense-api .
+```
+
+### 2. Run the Container
+```bash
+docker run -d \
+  -p 8000:8000 \
+  -e GROQ_API_KEY="your_groq_api_key_here" \
+  --name shopsense \
+  shopsense-api
+```
+
+### 3. Access Application & Docs
+- **Application Portal / Login Page**: `http://localhost:8000/login-page`
+- **Interactive API Documentation**: `http://localhost:8000/docs`
 
 ## 📌 Project Status
 

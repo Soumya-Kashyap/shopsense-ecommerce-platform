@@ -1,23 +1,26 @@
-from datetime import datetime, timezone, timedelta
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
-from sqlalchemy import func, desc
+from datetime import datetime, timedelta, timezone
 
-from database import get_db
+from fastapi import APIRouter, Depends
+from sqlalchemy import func
+from sqlalchemy.orm import Session
+
 import models
 import schemas
+from database import get_db
 
 router = APIRouter(
-    tags=["Analytics"]
+    tags=["Analytics & Benchmarking"]
 )
 
 
-@router.get("/analytics/sales-trend", response_model=list[schemas.SalesTrendDayItem])
+@router.get(
+    "/analytics/sales-trend",
+    response_model=list[schemas.SalesTrendDayItem],
+    summary="7-Day Daily Platform Sales Trend",
+    description="Returns total daily revenue (₹ INR) and order volume grouped by day for the past 7 consecutive days.",
+    response_description="Chronological list of 7 daily sales trend data points"
+)
 def get_sales_trend_analytics(db: Session = Depends(get_db)):
-    """
-    SALES TREND CHART FEATURE (Milestone 2):
-    Returns daily total revenue and orders grouped by day for the last 7 days.
-    """
     now_utc = datetime.now(timezone.utc)
     days_list = [now_utc - timedelta(days=i) for i in range(6, -1, -1)]
 
@@ -49,13 +52,14 @@ def get_sales_trend_analytics(db: Session = Depends(get_db)):
     return results
 
 
-@router.get("/analytics/benchmarks", response_model=schemas.VendorBenchmarkResponse)
+@router.get(
+    "/analytics/benchmarks",
+    response_model=schemas.VendorBenchmarkResponse,
+    summary="Vendor Performance Marketplace Benchmarking",
+    description="Calculates platform-wide marketplace baselines (Average Revenue per Vendor, Average Order Value, Average Units per Vendor) and classifies each merchant as 'Above Average', 'Average', or 'Below Average'.",
+    response_description="Marketplace average baselines and per-vendor performance benchmark metrics"
+)
 def get_vendor_benchmarks(db: Session = Depends(get_db)):
-    """
-    VENDOR BENCHMARKING METRICS ENDPOINT (Milestone 3):
-    Calculates marketplace-wide averages (Avg Revenue per Vendor, Average Order Value AOV,
-    Avg Units per Vendor) and compares each vendor's individual performance against marketplace benchmarks.
-    """
     vendors = db.query(models.Vendor).filter(models.Vendor.role == "vendor").all()
     vendor_count = len(vendors)
 
@@ -94,7 +98,6 @@ def get_vendor_benchmarks(db: Session = Depends(get_db)):
         v_units = int(v_stats.units_sold) if v_stats and v_stats.units_sold else 0
         v_aov = round(v_rev / max(v_orders, 1), 2) if v_orders > 0 else 0.0
 
-        # Performance classification vs marketplace average revenue
         if avg_revenue_per_vendor > 0:
             if v_rev >= (1.15 * avg_revenue_per_vendor):
                 perf = "Above Average"
@@ -116,7 +119,6 @@ def get_vendor_benchmarks(db: Session = Depends(get_db)):
             "performance": perf
         })
 
-    # Sort vendors descending by revenue
     vendor_benchmark_items.sort(key=lambda x: x["revenue"], reverse=True)
 
     return {

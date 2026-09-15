@@ -1,22 +1,21 @@
 import os
 import re
-from typing import Any
+
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
 from sqlalchemy import text
+from sqlalchemy.orm import Session
 
-from database import get_db
 import models
 import schemas
+from database import get_db
 
 load_dotenv()
 
 router = APIRouter(
-    tags=["AI Data Analyst Text-to-SQL (Milestone 3)"]
+    tags=["AI Data Analyst (Text-to-SQL)"]
 )
 
-# Complete SQLite Schema Context provided to Groq LLM
 DB_SCHEMA_CONTEXT = """
 -- SQLite Database Schema for ShopSense E-Commerce Platform:
 
@@ -63,42 +62,36 @@ def sanitize_and_validate_sql(sql_str: str) -> tuple[str, bool, str]:
     2. Enforces strict read-only SELECT constraints.
     3. Blacklists destructive keywords (INSERT, UPDATE, DELETE, DROP, ALTER, CREATE, TRUNCATE, ATTACH, DETACH, ;).
     """
-    # Remove markdown formatting if present
     clean_sql = re.sub(r"```sql|```", "", sql_str, flags=re.IGNORECASE).strip()
 
-    # Reject multi-statement query tricks via semicolon
     if ";" in clean_sql:
         clean_sql = clean_sql.split(";")[0].strip()
 
     sql_upper = clean_sql.upper()
 
-    # Blacklist destructive keywords
     forbidden = ["INSERT", "UPDATE", "DELETE", "DROP", "ALTER", "CREATE", "TRUNCATE", "ATTACH", "DETACH", "PRAGMA", "EXEC"]
     for word in forbidden:
-        # Match whole keyword or sub-word
         if re.search(r'\b' + word + r'\b', sql_upper):
             return "", False, f"Security Violation: Query contained forbidden operation keyword '{word}'."
 
-    # Must be a SELECT or WITH statement
     if not (sql_upper.startswith("SELECT") or sql_upper.startswith("WITH")):
         return "", False, "Security Violation: Query must start with SELECT or WITH statement."
 
     return clean_sql, True, ""
 
 
-@router.post("/vendor/{vendor_id}/ai-analyst", response_model=schemas.AIAnalystResponse)
+@router.post(
+    "/vendor/{vendor_id}/ai-analyst",
+    response_model=schemas.AIAnalystResponse,
+    summary="Vendor AI Data Analyst (Text-to-SQL)",
+    description="Converts natural language vendor questions into schema-aware, vendor-scoped SQLite SELECT queries. Validates query safety against destructive blacklists, executes SQL, and synthesizes a natural language business summary in ₹ INR.",
+    response_description="AI Data Analyst business response with validated SQL query and query data rows"
+)
 def run_vendor_ai_analyst(
     vendor_id: int,
     payload: schemas.AIAnalystRequest,
     db: Session = Depends(get_db)
 ):
-    """
-    POST /vendor/{vendor_id}/ai-analyst (Milestone 3 Text-to-SQL Feature):
-    1. Converts natural language vendor questions into valid, vendor-scoped SQLite queries.
-    2. Validates SQL for strict read-only safety (blacklists INSERT, UPDATE, DELETE, DROP, ALTER).
-    3. Executes query safely via SQLAlchemy.
-    4. Uses Groq LLM to synthesize natural language business answers in ₹ INR.
-    """
     vendor = db.query(models.Vendor).filter(models.Vendor.id == vendor_id).first()
     if not vendor:
         raise HTTPException(
@@ -109,7 +102,6 @@ def run_vendor_ai_analyst(
     question_text = payload.question.strip()
     groq_api_key = os.getenv("GROQ_API_KEY")
 
-    # Step 1: Text-to-SQL Prompting
     sql_prompt_system = (
         "You are an expert SQLite Text-to-SQL generator for the ShopSense e-commerce platform.\n"
         f"Database Schema:\n{DB_SCHEMA_CONTEXT}\n\n"
@@ -143,7 +135,6 @@ def run_vendor_ai_analyst(
         except Exception as err:
             print(f"Groq Text-to-SQL API warning: {err}")
 
-    # Fallback SQL query generation if Groq call is unavailable
     if not generated_sql:
         q_lower = question_text.lower()
         if "top" in q_lower or "best" in q_lower:
@@ -165,7 +156,6 @@ def run_vendor_ai_analyst(
                 f"FROM products p WHERE p.vendor_id = {vendor_id} ORDER BY p.stock_qty ASC"
             )
 
-    # Step 2: Safety Validation
     clean_sql, is_safe, err_msg = sanitize_and_validate_sql(generated_sql)
 
     if not is_safe:
@@ -176,13 +166,11 @@ def run_vendor_ai_analyst(
             "query_success": False
         }
 
-    # Step 3: Execute SQL Query safely via SQLAlchemy
     raw_data = []
     try:
         query_result = db.execute(text(clean_sql), {"vendor_id": vendor_id})
-        # Extract rows as dictionaries
         mappings = query_result.mappings().all()
-        for r in mappings[:50]:  # Limit max 50 rows
+        for r in mappings[:50]:
             row_dict = {}
             for k, v in r.items():
                 if isinstance(v, (float, int, str)) or v is None:
@@ -193,13 +181,12 @@ def run_vendor_ai_analyst(
     except Exception as exec_err:
         print(f"SQL execution error: {exec_err}")
         return {
-            "answer": f"I couldn't execute the generated SQL query directly ({str(exec_err)}). Please try rephrasing your question!",
+            "answer": f"I couldn't execute the generated SQL query directly ({exec_err!s}). Please try rephrasing your question!",
             "sql_query": clean_sql,
             "data": [],
             "query_success": False
         }
 
-    # Step 4: Synthesize Natural Language Answer using Groq LLM
     answer_synthesis_prompt = (
         "You are ShopSense AI Data Analyst, a sharp business intelligence advisor for vendor merchants.\n"
         f"Vendor Name: '{vendor.name}'\n"

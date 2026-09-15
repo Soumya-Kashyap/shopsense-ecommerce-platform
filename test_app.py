@@ -1,7 +1,8 @@
 from fastapi.testclient import TestClient
-from main import app
-from database import SessionLocal, engine, Base
+
 import models
+from database import Base, SessionLocal, engine
+from main import app
 
 # Initialize test client
 client = TestClient(app)
